@@ -1,0 +1,12 @@
+{
+  "name": "avella-taste-backend",
+  "version": "1.0.0",
+  "description": "Avella Taste secure backend",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}
