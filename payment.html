@@ -1,8 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
   <meta charset="UTF-8">
 
   <meta
@@ -10,270 +8,393 @@
     content="width=device-width, initial-scale=1.0"
   >
 
-  <title>
-    Payment | Avella Taste
-  </title>
-
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-
-  <link
-    rel="preconnect"
-    href="https://fonts.gstatic.com"
-    crossorigin
-  >
-
-  <link
-    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap"
-    rel="stylesheet"
-  >
+  <title>Payment | Avella Taste</title>
 
   <link
     rel="stylesheet"
     href="style.css"
   >
 
-</head>
+  <style>
 
+    .payment-page {
+      max-width: 700px;
+      margin: 40px auto;
+      padding: 20px;
+    }
+
+    .payment-card {
+      background: #fff;
+      border-radius: 20px;
+      padding: 25px;
+      margin-bottom: 20px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+    }
+
+    .payment-card h2 {
+      margin-top: 0;
+    }
+
+    .order-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 15px;
+      padding: 12px 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    .order-row:last-child {
+      border-bottom: none;
+    }
+
+    .payment-total {
+      font-size: 22px;
+      font-weight: bold;
+      margin-top: 15px;
+    }
+
+    .bank-detail {
+      background: #fff5f8;
+      border-radius: 14px;
+      padding: 15px;
+      margin: 10px 0;
+    }
+
+    .bank-detail strong {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .payment-form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .payment-form input,
+    .payment-form textarea {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 14px;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      font-size: 16px;
+    }
+
+    .payment-form textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    .receipt-box {
+      padding: 18px;
+      border: 2px dashed #e6b6c5;
+      border-radius: 15px;
+      background: #fff9fb;
+    }
+
+    .payment-button {
+      width: 100%;
+      border: none;
+      border-radius: 14px;
+      padding: 16px;
+      font-size: 17px;
+      font-weight: bold;
+      cursor: pointer;
+      background: #d96b91;
+      color: white;
+    }
+
+    .payment-button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .back-button {
+      display: inline-block;
+      margin-bottom: 20px;
+      text-decoration: none;
+    }
+
+    .empty-message {
+      text-align: center;
+      padding: 30px;
+    }
+
+    .success-message {
+      display: none;
+      text-align: center;
+      padding: 25px;
+    }
+
+    .success-message h2 {
+      color: #4a8f5c;
+    }
+
+  </style>
+</head>
 
 <body>
 
+  <header>
 
-  <!-- HEADER -->
+    <div class="container">
 
-  <header class="header">
-
-    <div class="container nav">
+      <h1>
+        Avella Taste
+      </h1>
 
       <a
-        href="index.html"
-        class="logo"
+        href="menu.html"
+        class="back-button"
       >
-        Avella <span>Taste</span>
+        ← Back to Menu
       </a>
-
-
-      <button
-        type="button"
-        class="cart-button"
-        onclick="window.history.back()"
-      >
-        ←
-      </button>
 
     </div>
 
   </header>
 
 
+  <main class="payment-page">
 
-  <!-- PAYMENT PAGE -->
+    <div
+      id="empty-message"
+      class="payment-card empty-message"
+      style="display:none;"
+    >
 
-  <main>
+      <h2>
+        Your cart is empty
+      </h2>
 
-    <section class="menu-section">
+      <p>
+        Please choose your items from the menu first.
+      </p>
 
-      <div class="container">
+      <a href="menu.html">
+        Go to Menu
+      </a>
 
-
-        <div class="section-heading">
-
-          <p class="eyebrow">
-            AVELLA TASTE
-          </p>
-
-
-          <h1>
-            Complete your
-            <span>payment.</span>
-          </h1>
-
-
-          <p>
-            Make your bank transfer, then upload
-            your payment receipt below.
-          </p>
-
-        </div>
+    </div>
 
 
+    <div id="payment-content">
 
-        <!-- ORDER SUMMARY -->
+      <!-- ORDER SUMMARY -->
 
-        <div class="payment-box">
+      <section class="payment-card">
 
-          <h3>
-            🛍️ Your Order
-          </h3>
+        <h2>
+          Your Order
+        </h2>
 
+        <div id="order-summary"></div>
 
-          <div id="payment-order-items">
+        <div class="payment-total">
 
-            <p>
-              Loading your order...
-            </p>
-
-          </div>
-
-
-          <hr>
-
-
-          <div class="cart-total">
-
-            <span>
-              Total to pay
-            </span>
-
-
-            <strong id="payment-total">
-              ₦0
-            </strong>
-
-          </div>
+          Total:
+          <span id="payment-total">
+            ₦0
+          </span>
 
         </div>
 
+      </section>
 
 
-        <!-- BANK DETAILS -->
+      <!-- BANK DETAILS -->
 
-        <div class="payment-box">
+      <section class="payment-card">
 
-          <h3>
-            💳 Bank Transfer
-          </h3>
+        <h2>
+          Make Payment
+        </h2>
 
+        <p>
+          Transfer the exact total amount to:
+        </p>
 
-          <p>
-            Please transfer the exact amount shown
-            above to:
-          </p>
+        <div class="bank-detail">
 
+          <strong>
+            Bank
+          </strong>
 
-          <p>
-            <strong>
-              Bank
-            </strong>
-
-            <br>
-
-            OPay (OPaycom)
-          </p>
-
-
-          <p>
-            <strong>
-              Account Name
-            </strong>
-
-            <br>
-
-            AMARACHI NWANKWO
-          </p>
-
-
-          <p>
-            <strong>
-              Account Number
-            </strong>
-
-            <br>
-
-            8157550592
-          </p>
-
-
-          <p>
-
-            After making the transfer,
-            upload your payment receipt below.
-
-          </p>
+          OPay (OPaycom)
 
         </div>
 
+        <div class="bank-detail">
 
+          <strong>
+            Account Name
+          </strong>
 
-        <!-- RECEIPT UPLOAD -->
-
-        <div class="payment-box">
-
-          <h3>
-            📸 Upload Payment Receipt
-          </h3>
-
-
-          <p>
-
-            Select the screenshot or receipt
-            from your phone gallery or files.
-
-          </p>
-
-
-          <input
-            type="file"
-            id="payment-receipt"
-            accept="image/*,.pdf"
-          >
-
-
-          <p
-            id="receipt-name"
-            style="margin-top: 10px;"
-          ></p>
+          AMARACHI NWANKWO
 
         </div>
 
+        <div class="bank-detail">
+
+          <strong>
+            Account Number
+          </strong>
+
+          8157550592
+
+        </div>
+
+      </section>
 
 
-        <!-- PAYMENT BUTTON -->
+      <!-- CUSTOMER DETAILS -->
 
-        <button
-          type="button"
-          id="payment-button"
-          class="primary-button full-width"
+      <section class="payment-card">
+
+        <h2>
+          Your Details
+        </h2>
+
+        <form
+          id="payment-form"
+          class="payment-form"
         >
 
-          I have made payment
+          <input
+            type="text"
+            id="customer-name"
+            placeholder="Full name"
+            required
+          >
 
-        </button>
+          <input
+            type="email"
+            id="customer-email"
+            placeholder="Email address"
+            required
+          >
+
+          <input
+            type="tel"
+            id="customer-phone"
+            placeholder="Phone number"
+            required
+          >
+
+          <textarea
+            id="delivery-address"
+            placeholder="Delivery address"
+            required
+          ></textarea>
 
 
-        <p
-          id="payment-message"
-          style="text-align:center; margin-top:20px;"
-        ></p>
+          <!-- RECEIPT -->
+
+          <div class="receipt-box">
+
+            <h3>
+              Upload Payment Receipt
+            </h3>
+
+            <p>
+              Upload the screenshot or file showing your payment.
+            </p>
+
+            <input
+              type="file"
+              id="payment-receipt"
+              accept="image/*,.pdf"
+              required
+            >
+
+          </div>
 
 
-      </div>
+          <button
+            type="submit"
+            id="payment-button"
+            class="payment-button"
+          >
+            I have made payment
+          </button>
+
+        </form>
+
+      </section>
+
+    </div>
+
+
+    <!-- SUCCESS -->
+
+    <section
+      id="success-message"
+      class="payment-card success-message"
+    >
+
+      <h2>
+        Payment proof submitted!
+      </h2>
+
+      <p>
+        Thank you for ordering from Avella Taste.
+      </p>
+
+      <p>
+        Your order number is:
+      </p>
+
+      <h3 id="success-order-number"></h3>
+
+      <p>
+        We will confirm your payment and process your order.
+      </p>
+
+      <a href="menu.html">
+        Continue Shopping
+      </a>
 
     </section>
 
   </main>
 
 
-
-  <!-- JAVASCRIPT -->
-
   <script>
 
-    // ========================================
-    // LOAD ORDER FROM CART
-    // ========================================
+    // ==========================================
+    // LOAD CART
+    // ==========================================
 
-    const cart =
-      JSON.parse(
+    let cart = [];
+
+    try {
+
+      cart = JSON.parse(
         localStorage.getItem("avellaCart") || "[]"
       );
 
+    } catch (error) {
 
-    const orderItems =
+      cart = [];
+
+    }
+
+
+    const emptyMessage =
       document.getElementById(
-        "payment-order-items"
+        "empty-message"
       );
 
+    const paymentContent =
+      document.getElementById(
+        "payment-content"
+      );
+
+    const orderSummary =
+      document.getElementById(
+        "order-summary"
+      );
 
     const paymentTotal =
       document.getElementById(
@@ -281,34 +402,9 @@
       );
 
 
-    const receiptInput =
-      document.getElementById(
-        "payment-receipt"
-      );
-
-
-    const receiptName =
-      document.getElementById(
-        "receipt-name"
-      );
-
-
-    const paymentButton =
-      document.getElementById(
-        "payment-button"
-      );
-
-
-    const paymentMessage =
-      document.getElementById(
-        "payment-message"
-      );
-
-
-
-    // ========================================
+    // ==========================================
     // FORMAT MONEY
-    // ========================================
+    // ==========================================
 
     function formatMoney(amount) {
 
@@ -318,29 +414,19 @@
     }
 
 
+    // ==========================================
+    // SHOW ORDER
+    // ==========================================
 
-    // ========================================
-    // DISPLAY ORDER
-    // ========================================
+    function showOrder() {
 
-    function displayOrder() {
+      if (!cart.length) {
 
+        paymentContent.style.display =
+          "none";
 
-      if (
-        !cart ||
-        cart.length === 0
-      ) {
-
-        orderItems.innerHTML = `
-
-          <p>
-            No items found in your order.
-          </p>
-
-        `;
-
-        paymentTotal.textContent =
-          "₦0";
+        emptyMessage.style.display =
+          "block";
 
         return;
 
@@ -350,42 +436,36 @@
       let total = 0;
 
 
-      orderItems.innerHTML =
+      orderSummary.innerHTML =
         cart.map(item => {
-
 
           const itemTotal =
             Number(item.price) *
             Number(item.quantity);
-
 
           total += itemTotal;
 
 
           return `
 
-            <div
-              style="
-                display:flex;
-                justify-content:space-between;
-                gap:15px;
-                margin-bottom:12px;
-              "
-            >
+            <div class="order-row">
 
-              <span>
+              <div>
 
-                ${item.name}
+                <strong>
+                  ${escapeHtml(item.name)}
+                </strong>
 
-                × ${item.quantity}
+                <br>
 
-              </span>
+                ${item.quantity}
+                ×
+                ${formatMoney(item.price)}
 
+              </div>
 
               <strong>
-
                 ${formatMoney(itemTotal)}
-
               </strong>
 
             </div>
@@ -401,89 +481,80 @@
     }
 
 
+    // ==========================================
+    // ESCAPE HTML
+    // ==========================================
 
-    // ========================================
-    // SHOW FILE NAME
-    // ========================================
+    function escapeHtml(value) {
 
-    receiptInput.addEventListener(
-      "change",
-      function() {
+      return String(value)
+
+        .replaceAll("&", "&amp;")
+
+        .replaceAll("<", "&lt;")
+
+        .replaceAll(">", "&gt;")
+
+        .replaceAll('"', "&quot;")
+
+        .replaceAll("'", "&#039;");
+
+    }
 
 
-        if (
-          receiptInput.files &&
-          receiptInput.files.length > 0
-        ) {
+    // ==========================================
+    // FORM
+    // ==========================================
 
-          receiptName.textContent =
-            "Selected: " +
-            receiptInput.files[0].name;
+    document
+      .getElementById("payment-form")
+      .addEventListener(
+        "submit",
+        function(event) {
 
-        } else {
+          event.preventDefault();
 
-          receiptName.textContent =
-            "";
+
+          const receipt =
+            document.getElementById(
+              "payment-receipt"
+            ).files[0];
+
+
+          if (!receipt) {
+
+            alert(
+              "Please upload your payment receipt."
+            );
+
+            return;
+
+          }
+
+
+          /*
+            This is temporarily only confirming
+            that the receipt was selected.
+
+            We will connect the actual upload
+            to Supabase in the next step.
+          */
+
+          alert(
+            "Receipt selected successfully. The upload system will be connected next."
+          );
 
         }
-
-      }
-    );
+      );
 
 
-
-    // ========================================
-    // PAYMENT BUTTON
-    // ========================================
-
-    paymentButton.addEventListener(
-      "click",
-      function() {
-
-
-        if (
-          !receiptInput.files ||
-          receiptInput.files.length === 0
-        ) {
-
-          paymentMessage.textContent =
-            "Please upload your payment receipt first.";
-
-          paymentMessage.style.color =
-            "#c85d7c";
-
-          return;
-
-        }
-
-
-        paymentMessage.textContent =
-          "Receipt selected. We are preparing your order...";
-
-        paymentMessage.style.color =
-          "#4d3438";
-
-
-        /*
-          Actual secure receipt upload and
-          order submission will be connected
-          in the next step.
-        */
-
-      }
-    );
-
-
-
-    // ========================================
+    // ==========================================
     // START
-    // ========================================
+    // ==========================================
 
-    displayOrder();
+    showOrder();
 
   </script>
 
-
 </body>
-
 </html>
