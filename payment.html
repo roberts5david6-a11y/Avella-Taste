@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>
+    Payment | Avella Taste
+  </title>
+
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+
+  <link
+    rel="preconnect"
+    href="https://fonts.gstatic.com"
+    crossorigin
+  >
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap"
+    rel="stylesheet"
+  >
+
+  <link
+    rel="stylesheet"
+    href="style.css"
+  >
+
+</head>
+
+
+<body>
+
+
+  <!-- HEADER -->
+
+  <header class="header">
+
+    <div class="container nav">
+
+      <a
+        href="index.html"
+        class="logo"
+      >
+        Avella <span>Taste</span>
+      </a>
+
+
+      <button
+        type="button"
+        class="cart-button"
+        onclick="window.history.back()"
+      >
+        ←
+      </button>
+
+    </div>
+
+  </header>
+
+
+
+  <!-- PAYMENT PAGE -->
+
+  <main>
+
+    <section class="menu-section">
+
+      <div class="container">
+
+
+        <div class="section-heading">
+
+          <p class="eyebrow">
+            AVELLA TASTE
+          </p>
+
+
+          <h1>
+            Complete your
+            <span>payment.</span>
+          </h1>
+
+
+          <p>
+            Make your bank transfer, then upload
+            your payment receipt below.
+          </p>
+
+        </div>
+
+
+
+        <!-- ORDER SUMMARY -->
+
+        <div class="payment-box">
+
+          <h3>
+            🛍️ Your Order
+          </h3>
+
+
+          <div id="payment-order-items">
+
+            <p>
+              Loading your order...
+            </p>
+
+          </div>
+
+
+          <hr>
+
+
+          <div class="cart-total">
+
+            <span>
+              Total to pay
+            </span>
+
+
+            <strong id="payment-total">
+              ₦0
+            </strong>
+
+          </div>
+
+        </div>
+
+
+
+        <!-- BANK DETAILS -->
+
+        <div class="payment-box">
+
+          <h3>
+            💳 Bank Transfer
+          </h3>
+
+
+          <p>
+            Please transfer the exact amount shown
+            above to:
+          </p>
+
+
+          <p>
+            <strong>
+              Bank
+            </strong>
+
+            <br>
+
+            OPay (OPaycom)
+          </p>
+
+
+          <p>
+            <strong>
+              Account Name
+            </strong>
+
+            <br>
+
+            AMARACHI NWANKWO
+          </p>
+
+
+          <p>
+            <strong>
+              Account Number
+            </strong>
+
+            <br>
+
+            8157550592
+          </p>
+
+
+          <p>
+
+            After making the transfer,
+            upload your payment receipt below.
+
+          </p>
+
+        </div>
+
+
+
+        <!-- RECEIPT UPLOAD -->
+
+        <div class="payment-box">
+
+          <h3>
+            📸 Upload Payment Receipt
+          </h3>
+
+
+          <p>
+
+            Select the screenshot or receipt
+            from your phone gallery or files.
+
+          </p>
+
+
+          <input
+            type="file"
+            id="payment-receipt"
+            accept="image/*,.pdf"
+          >
+
+
+          <p
+            id="receipt-name"
+            style="margin-top: 10px;"
+          ></p>
+
+        </div>
+
+
+
+        <!-- PAYMENT BUTTON -->
+
+        <button
+          type="button"
+          id="payment-button"
+          class="primary-button full-width"
+        >
+
+          I have made payment
+
+        </button>
+
+
+        <p
+          id="payment-message"
+          style="text-align:center; margin-top:20px;"
+        ></p>
+
+
+      </div>
+
+    </section>
+
+  </main>
+
+
+
+  <!-- JAVASCRIPT -->
+
+  <script>
+
+    // ========================================
+    // LOAD ORDER FROM CART
+    // ========================================
+
+    const cart =
+      JSON.parse(
+        localStorage.getItem("avellaCart") || "[]"
+      );
+
+
+    const orderItems =
+      document.getElementById(
+        "payment-order-items"
+      );
+
+
+    const paymentTotal =
+      document.getElementById(
+        "payment-total"
+      );
+
+
+    const receiptInput =
+      document.getElementById(
+        "payment-receipt"
+      );
+
+
+    const receiptName =
+      document.getElementById(
+        "receipt-name"
+      );
+
+
+    const paymentButton =
+      document.getElementById(
+        "payment-button"
+      );
+
+
+    const paymentMessage =
+      document.getElementById(
+        "payment-message"
+      );
+
+
+
+    // ========================================
+    // FORMAT MONEY
+    // ========================================
+
+    function formatMoney(amount) {
+
+      return "₦" +
+        Number(amount).toLocaleString("en-NG");
+
+    }
+
+
+
+    // ========================================
+    // DISPLAY ORDER
+    // ========================================
+
+    function displayOrder() {
+
+
+      if (
+        !cart ||
+        cart.length === 0
+      ) {
+
+        orderItems.innerHTML = `
+
+          <p>
+            No items found in your order.
+          </p>
+
+        `;
+
+        paymentTotal.textContent =
+          "₦0";
+
+        return;
+
+      }
+
+
+      let total = 0;
+
+
+      orderItems.innerHTML =
+        cart.map(item => {
+
+
+          const itemTotal =
+            Number(item.price) *
+            Number(item.quantity);
+
+
+          total += itemTotal;
+
+
+          return `
+
+            <div
+              style="
+                display:flex;
+                justify-content:space-between;
+                gap:15px;
+                margin-bottom:12px;
+              "
+            >
+
+              <span>
+
+                ${item.name}
+
+                × ${item.quantity}
+
+              </span>
+
+
+              <strong>
+
+                ${formatMoney(itemTotal)}
+
+              </strong>
+
+            </div>
+
+          `;
+
+        }).join("");
+
+
+      paymentTotal.textContent =
+        formatMoney(total);
+
+    }
+
+
+
+    // ========================================
+    // SHOW FILE NAME
+    // ========================================
+
+    receiptInput.addEventListener(
+      "change",
+      function() {
+
+
+        if (
+          receiptInput.files &&
+          receiptInput.files.length > 0
+        ) {
+
+          receiptName.textContent =
+            "Selected: " +
+            receiptInput.files[0].name;
+
+        } else {
+
+          receiptName.textContent =
+            "";
+
+        }
+
+      }
+    );
+
+
+
+    // ========================================
+    // PAYMENT BUTTON
+    // ========================================
+
+    paymentButton.addEventListener(
+      "click",
+      function() {
+
+
+        if (
+          !receiptInput.files ||
+          receiptInput.files.length === 0
+        ) {
+
+          paymentMessage.textContent =
+            "Please upload your payment receipt first.";
+
+          paymentMessage.style.color =
+            "#c85d7c";
+
+          return;
+
+        }
+
+
+        paymentMessage.textContent =
+          "Receipt selected. We are preparing your order...";
+
+        paymentMessage.style.color =
+          "#4d3438";
+
+
+        /*
+          Actual secure receipt upload and
+          order submission will be connected
+          in the next step.
+        */
+
+      }
+    );
+
+
+
+    // ========================================
+    // START
+    // ========================================
+
+    displayOrder();
+
+  </script>
+
+
+</body>
+
+</html>
