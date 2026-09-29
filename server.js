@@ -1,8 +1,14 @@
 const express = require("express");
+const { createClient } = require("@supabase/supabase-js");
 
 const app = express();
 
 app.use(express.json());
+
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SECRET_KEY
+);
 
 app.get("/", (req, res) => {
   res.send("Avella Taste backend is running.");
