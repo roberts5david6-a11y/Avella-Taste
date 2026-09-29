@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Menu | Avella Taste</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+
+  <link
+    rel="preconnect"
+    href="https://fonts.gstatic.com"
+    crossorigin
+  >
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap"
+    rel="stylesheet"
+  >
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="container nav">
+
+      <a href="index.html" class="logo">
+        Avella Taste
+      </a>
+
+      <nav class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="menu.html" class="active">Menu</a>
+      </nav>
+
+      <button
+        type="button"
+        class="cart-button"
+        onclick="toggleCart()"
+      >
+        🛒
+        <span id="cart-count">0</span>
+      </button>
+
+    </div>
+  </header>
+
+
+  <!-- MENU -->
+  <main>
+
+    <section class="menu-section">
+      <div class="container">
+
+        <div class="section-heading">
+          <p class="eyebrow">
+            AVELLA TASTE
+          </p>
+
+          <h1>
+            Our Menu
+          </h1>
+
+          <p>
+            Freshly made treats and creamy goodness,
+            prepared with love.
+          </p>
+        </div>
+
+
+        <div class="menu-grid">
+
+
+          <!-- MILKY YOGURT -->
+          <div class="product-card">
+
+            <div class="product-image">
+              <span>🥛</span>
+            </div>
+
+            <div class="product-info">
+
+              <h3>
+                Milky Yogurt
+              </h3>
+
+              <p class="product-description">
+                Plain • 35cl
+              </p>
+
+              <div class="product-bottom">
+
+                <strong>
+                  ₦1,500
+                </strong>
+
+                <button
+                  type="button"
+                  onclick="addToCart('Milky Yogurt (Plain) - 35cl', 1500)"
+                >
+                  Add
+                </button>
+
+              </div>
+
+            </div>
+          </div>
+
+
+          <!-- GREEK YOGURT 500ML -->
+          <div class="product-card">
+
+            <div class="product-image">
+              <span>🍓</span>
+            </div>
+
+            <div class="product-info">
+
+              <h3>
+                Greek Yogurt
+              </h3>
+
+              <p class="product-description">
+                Sweetened / Unsweetened • 500ml
+              </p>
+
+              <div class="product-bottom">
+
+                <strong>
+                  ₦5,000
+                </strong>
+
+                <button
+                  type="button"
+                  onclick="addToCart('Greek Yogurt - 500ml', 5000)"
+                >
+                  Add
+                </button>
+
+              </div>
+
+            </div>
+          </div>
+
+
+          <!-- GREEK YOGURT 1L -->
+          <div class="product-card">
+
+            <div class="product-image">
+              <span>🥛</span>
+            </div>
+
+            <div class="product-info">
+
+              <h3>
+                Greek Yogurt
+              </h3>
+
+              <p class="product-description">
+                Sweetened / Unsweetened • 1L
+              </p>
+
+              <div class="product-bottom">
+
+                <strong>
+                  ₦9,500
+                </strong>
+
+                <button
+                  type="button"
+                  onclick="addToCart('Greek Yogurt - 1L', 9500)"
+                >
+                  Add
+                </button>
+
+              </div>
+
+            </div>
+          </div>
+
+
+          <!-- BANANA BREAD 1 -->
+          <div class="product-card">
+
+            <div class="product-image">
+              <span>🍌</span>
+            </div>
+
+            <div class="product-info">
+
+              <h3>
+                Mini Banana Bread
+              </h3>
+
+              <p class="product-description">
+                1 piece
+              </p>
+
+              <div class="product-bottom">
+
+                <strong>
+                  ₦1,000
+                </strong>
+
+                <button
+                  type="button"
+                  onclick="addToCart('Mini Banana Bread - 1 pc', 1000)"
+                >
+                  Add
+                </button>
+
+              </div>
+
+            </div>
+          </div>
+
+
+          <!-- BANANA BREAD 3 -->
+          <div class="product-card">
+
+            <div class="product-image">
+              <span>🍌</span>
+            </div>
+
+            <div class="product-info">
+
+              <h3>
+                Mini Banana Bread
+              </h3>
+
+              <p class="product-description">
+                3 pieces
+              </p>
+
+              <div class="product-bottom">
+
+                <strong>
+                  ₦2,500
+                </strong>
+
+                <button
+                  type="button"
+                  onclick="addToCart('Mini Banana Bread - 3 pcs', 2500)"
+                >
+                  Add
+                </button>
+
+              </div>
+
+            </div>
+          </div>
+
+
+          <!-- BANANA BREAD 4 -->
+          <div class="product-card">
+
+            <div class="product-image">
+              <span>🍌</span>
+            </div>
+
+            <div class="product-info">
+
+              <h3>
+                Mini Banana Bread
+              </h3>
+
+              <p class="product-description">
+                Pack of 4
+              </p>
+
+              <div class="product-bottom">
+
+                <strong>
+                  ₦3,500
+                </strong>
+
+                <button
+                  type="button"
+                  onclick="addToCart('Mini Banana Bread - Pack of 4', 3500)"
+                >
+                  Add
+                </button>
+
+              </div>
+
+            </div>
+          </div>
+
+
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+
+  <!-- CART OVERLAY -->
+  <div
+    id="cart-overlay"
+    class="overlay"
+  >
+
+    <div class="cart-box">
+
+      <div class="cart-header">
+
+        <h2>
+          Your Cart
+        </h2>
+
+        <button
+          type="button"
+          onclick="toggleCart()"
+        >
+          ×
+        </button>
+
+      </div>
+
+
+      <div id="cart-items">
+
+        <p class="empty-cart">
+          Your cart is empty.
+        </p>
+
+      </div>
+
+
+      <div class="cart-footer">
+
+        <div class="cart-total-row">
+
+          <span>
+            Total
+          </span>
+
+          <strong id="cart-total">
+            ₦0
+          </strong>
+
+        </div>
+
+        <button
+          type="button"
+          id="checkout-button"
+          class="checkout-button"
+          onclick="openCheckout()"
+        >
+          Checkout
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- CHECKOUT OVERLAY -->
+  <div
+    id="checkout-overlay"
+    class="overlay"
+  >
+
+    <div class="checkout-box">
+
+      <div class="cart-header">
+
+        <h2>
+          Checkout
+        </h2>
+
+        <button
+          type="button"
+          onclick="closeCheckout()"
+        >
+          ×
+        </button>
+
+      </div>
+
+
+      <form id="checkout-form">
+
+        <label for="customer-name">
+          Full Name
+        </label>
+
+        <input
+          type="text"
+          id="customer-name"
+          required
+        >
+
+
+        <label for="customer-email">
+          Email
+        </label>
+
+        <input
+          type="email"
+          id="customer-email"
+          required
+        >
+
+
+        <label for="customer-phone">
+          Phone Number
+        </label>
+
+        <input
+          type="tel"
+          id="customer-phone"
+          required
+        >
+
+
+        <label for="customer-address">
+          Delivery Address
+        </label>
+
+        <textarea
+          id="customer-address"
+          rows="3"
+          required
+        ></textarea>
+
+
+        <div class="payment-box">
+
+          <h3>
+            Bank Transfer
+          </h3>
+
+          <p>
+            Please transfer your order total to:
+          </p>
+
+          <p>
+            <strong>Bank:</strong>
+            OPay (OPaycom)
+          </p>
+
+          <p>
+            <strong>Account Name:</strong>
+            AMARACHI NWANKWO
+          </p>
+
+          <p>
+            <strong>Account Number:</strong>
+            8157550592
+          </p>
+
+        </div>
+
+
+        <label for="payment-reference">
+          Payment Reference
+        </label>
+
+        <input
+          type="text"
+          id="payment-reference"
+          placeholder="Enter your transfer reference"
+          required
+        >
+
+
+        <div class="checkout-total">
+
+          <span>
+            Order Total
+          </span>
+
+          <strong id="checkout-total">
+            ₦0
+          </strong>
+
+        </div>
+
+
+        <button
+          type="submit"
+          class="submit-button"
+        >
+          Submit Order
+        </button>
+
+
+        <p
+          id="checkout-message"
+          class="checkout-message"
+        ></p>
+
+      </form>
+
+    </div>
+
+  </div>
+
+
+  <!-- SCRIPTS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script src="supabase-config.js"></script>
+
+  <script src="script.js"></script>
+
+</body>
+            </html>
