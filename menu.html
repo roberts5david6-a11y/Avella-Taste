@@ -30,6 +30,7 @@
 
   <!-- HEADER -->
   <header class="header">
+
     <div class="container nav">
 
       <a href="index.html" class="logo">
@@ -37,20 +38,37 @@
       </a>
 
       <nav class="nav-links">
-        <a href="index.html">Home</a>
-        <a href="menu.html" class="active">Menu</a>
+
+        <a href="index.html">
+          Home
+        </a>
+
+        <a
+          href="menu.html"
+          class="active"
+        >
+          Menu
+        </a>
+
       </nav>
+
 
       <button
         type="button"
         class="cart-button"
         onclick="toggleCart()"
       >
+
         🛒
-        <span id="cart-count">0</span>
+
+        <span id="cart-count">
+          0
+        </span>
+
       </button>
 
     </div>
+
   </header>
 
 
@@ -58,9 +76,11 @@
   <main>
 
     <section class="menu-section">
+
       <div class="container">
 
         <div class="section-heading">
+
           <p class="eyebrow">
             AVELLA TASTE
           </p>
@@ -73,6 +93,7 @@
             Freshly made treats and creamy goodness,
             prepared with love.
           </p>
+
         </div>
 
 
@@ -112,6 +133,7 @@
               </div>
 
             </div>
+
           </div>
 
 
@@ -148,6 +170,7 @@
               </div>
 
             </div>
+
           </div>
 
 
@@ -184,6 +207,7 @@
               </div>
 
             </div>
+
           </div>
 
 
@@ -220,6 +244,7 @@
               </div>
 
             </div>
+
           </div>
 
 
@@ -256,6 +281,7 @@
               </div>
 
             </div>
+
           </div>
 
 
@@ -292,11 +318,14 @@
               </div>
 
             </div>
+
           </div>
 
 
         </div>
+
       </div>
+
     </section>
 
   </main>
@@ -349,11 +378,14 @@
 
         </div>
 
+
+        <!-- CHECKOUT NOW GOES TO PAYMENT PAGE -->
+
         <button
           type="button"
           id="checkout-button"
           class="checkout-button"
-          onclick="openCheckout()"
+          onclick="window.location.href='payment.html'"
         >
           Checkout
         </button>
@@ -365,7 +397,12 @@
   </div>
 
 
-  <!-- CHECKOUT OVERLAY -->
+  <!-- OLD CHECKOUT OVERLAY -->
+  <!--
+    This is kept in the file temporarily.
+    The Checkout button above no longer opens it.
+  -->
+
   <div
     id="checkout-overlay"
     class="overlay"
@@ -446,17 +483,26 @@
           </p>
 
           <p>
-            <strong>Bank:</strong>
+            <strong>
+              Bank:
+            </strong>
+
             OPay (OPaycom)
           </p>
 
           <p>
-            <strong>Account Name:</strong>
+            <strong>
+              Account Name:
+            </strong>
+
             AMARACHI NWANKWO
           </p>
 
           <p>
-            <strong>Account Number:</strong>
+            <strong>
+              Account Number:
+            </strong>
+
             8157550592
           </p>
 
@@ -509,11 +555,13 @@
 
 
   <!-- SCRIPTS -->
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <script src="supabase-config.js"></script>
 
   <script src="script.js"></script>
 
+
 </body>
-            </html>
+              </html>
