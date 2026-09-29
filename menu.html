@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
   <meta charset="UTF-8">
 
   <meta
@@ -24,18 +26,176 @@
   >
 
   <link rel="stylesheet" href="style.css">
+
+  <style>
+
+    .cart-button {
+      cursor: pointer;
+    }
+
+    .overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    .overlay.show {
+      display: flex;
+    }
+
+    .cart-box {
+      width: 100%;
+      max-width: 500px;
+      max-height: 85vh;
+      overflow-y: auto;
+      background: white;
+      border-radius: 22px;
+      padding: 22px;
+      box-sizing: border-box;
+    }
+
+    .cart-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .cart-header h2 {
+      margin: 0;
+    }
+
+    .cart-close {
+      border: none;
+      background: transparent;
+      font-size: 30px;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+      padding: 15px 0;
+      border-bottom: 1px solid #eeeeee;
+    }
+
+    .cart-item-info {
+      flex: 1;
+    }
+
+    .cart-item-name {
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+
+    .cart-item-price {
+      font-size: 14px;
+      opacity: 0.7;
+    }
+
+    .quantity-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .quantity-controls button {
+      width: 34px;
+      height: 34px;
+      border: none;
+      border-radius: 8px;
+      background: #f7dce6;
+      cursor: pointer;
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .quantity-number {
+      min-width: 25px;
+      text-align: center;
+      font-weight: 600;
+    }
+
+    .cart-item-total {
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .empty-cart {
+      text-align: center;
+      padding: 30px 10px;
+      opacity: 0.7;
+    }
+
+    .cart-footer {
+      margin-top: 20px;
+    }
+
+    .cart-total-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 20px;
+      margin-bottom: 18px;
+    }
+
+    .checkout-button {
+      display: block;
+      width: 100%;
+      box-sizing: border-box;
+      text-align: center;
+      text-decoration: none;
+      border: none;
+      border-radius: 14px;
+      padding: 15px;
+      background: #d96b91;
+      color: white;
+      font-size: 17px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .checkout-button.disabled {
+      background: #cccccc;
+      color: #777777;
+      pointer-events: none;
+    }
+
+    .product-bottom button {
+      cursor: pointer;
+    }
+
+  </style>
+
 </head>
+
 
 <body>
 
+
   <!-- HEADER -->
+
   <header class="header">
 
     <div class="container nav">
 
-      <a href="index.html" class="logo">
+      <a
+        href="index.html"
+        class="logo"
+      >
         Avella Taste
       </a>
+
 
       <nav class="nav-links">
 
@@ -56,7 +216,7 @@
       <button
         type="button"
         class="cart-button"
-        onclick="toggleCart()"
+        id="cart-button"
       >
 
         🛒
@@ -72,12 +232,15 @@
   </header>
 
 
+
   <!-- MENU -->
+
   <main>
 
     <section class="menu-section">
 
       <div class="container">
+
 
         <div class="section-heading">
 
@@ -97,10 +260,12 @@
         </div>
 
 
+
         <div class="menu-grid">
 
 
           <!-- MILKY YOGURT -->
+
           <div class="product-card">
 
             <div class="product-image">
@@ -125,7 +290,9 @@
 
                 <button
                   type="button"
-                  onclick="addToCart('Milky Yogurt (Plain) - 35cl', 1500)"
+                  class="add-button"
+                  data-name="Milky Yogurt (Plain) - 35cl"
+                  data-price="1500"
                 >
                   Add
                 </button>
@@ -137,7 +304,9 @@
           </div>
 
 
+
           <!-- GREEK YOGURT 500ML -->
+
           <div class="product-card">
 
             <div class="product-image">
@@ -162,7 +331,9 @@
 
                 <button
                   type="button"
-                  onclick="addToCart('Greek Yogurt - 500ml', 5000)"
+                  class="add-button"
+                  data-name="Greek Yogurt - 500ml"
+                  data-price="5000"
                 >
                   Add
                 </button>
@@ -174,7 +345,9 @@
           </div>
 
 
+
           <!-- GREEK YOGURT 1L -->
+
           <div class="product-card">
 
             <div class="product-image">
@@ -199,7 +372,9 @@
 
                 <button
                   type="button"
-                  onclick="addToCart('Greek Yogurt - 1L', 9500)"
+                  class="add-button"
+                  data-name="Greek Yogurt - 1L"
+                  data-price="9500"
                 >
                   Add
                 </button>
@@ -211,7 +386,9 @@
           </div>
 
 
+
           <!-- BANANA BREAD 1 -->
+
           <div class="product-card">
 
             <div class="product-image">
@@ -236,7 +413,9 @@
 
                 <button
                   type="button"
-                  onclick="addToCart('Mini Banana Bread - 1 pc', 1000)"
+                  class="add-button"
+                  data-name="Mini Banana Bread - 1 pc"
+                  data-price="1000"
                 >
                   Add
                 </button>
@@ -248,7 +427,9 @@
           </div>
 
 
+
           <!-- BANANA BREAD 3 -->
+
           <div class="product-card">
 
             <div class="product-image">
@@ -273,7 +454,9 @@
 
                 <button
                   type="button"
-                  onclick="addToCart('Mini Banana Bread - 3 pcs', 2500)"
+                  class="add-button"
+                  data-name="Mini Banana Bread - 3 pcs"
+                  data-price="2500"
                 >
                   Add
                 </button>
@@ -285,7 +468,9 @@
           </div>
 
 
+
           <!-- BANANA BREAD 4 -->
+
           <div class="product-card">
 
             <div class="product-image">
@@ -310,7 +495,9 @@
 
                 <button
                   type="button"
-                  onclick="addToCart('Mini Banana Bread - Pack of 4', 3500)"
+                  class="add-button"
+                  data-name="Mini Banana Bread - Pack of 4"
+                  data-price="3500"
                 >
                   Add
                 </button>
@@ -331,13 +518,16 @@
   </main>
 
 
-  <!-- CART OVERLAY -->
+
+  <!-- CART -->
+
   <div
     id="cart-overlay"
     class="overlay"
   >
 
     <div class="cart-box">
+
 
       <div class="cart-header">
 
@@ -347,7 +537,8 @@
 
         <button
           type="button"
-          onclick="toggleCart()"
+          class="cart-close"
+          id="cart-close"
         >
           ×
         </button>
@@ -379,15 +570,12 @@
         </div>
 
 
-        <!-- CHECKOUT NOW GOES TO PAYMENT PAGE -->
-
         <a
-  href="payment.html"
-  id="checkout-button"
-  class="checkout-button"
-  style="display: block; text-align: center; text-decoration: none;"
->
-  Checkout
+          href="payment.html"
+          id="checkout-button"
+          class="checkout-button disabled"
+        >
+          Checkout
         </a>
 
       </div>
@@ -397,171 +585,380 @@
   </div>
 
 
-  <!-- OLD CHECKOUT OVERLAY -->
-  <!--
-    This is kept in the file temporarily.
-    The Checkout button above no longer opens it.
-  -->
 
-  <div
-    id="checkout-overlay"
-    class="overlay"
-  >
+  <!-- CART JAVASCRIPT -->
 
-    <div class="checkout-box">
+  <script>
 
-      <div class="cart-header">
-
-        <h2>
-          Checkout
-        </h2>
-
-        <button
-          type="button"
-          onclick="closeCheckout()"
-        >
-          ×
-        </button>
-
-      </div>
+    let cart = [];
 
 
-      <form id="checkout-form">
+    try {
 
-        <label for="customer-name">
-          Full Name
-        </label>
+      cart = JSON.parse(
+        localStorage.getItem("avellaCart") || "[]"
+      );
 
-        <input
-          type="text"
-          id="customer-name"
-          required
-        >
+      if (!Array.isArray(cart)) {
+        cart = [];
+      }
 
+    } catch (error) {
 
-        <label for="customer-email">
-          Email
-        </label>
+      cart = [];
 
-        <input
-          type="email"
-          id="customer-email"
-          required
-        >
+    }
 
 
-        <label for="customer-phone">
-          Phone Number
-        </label>
 
-        <input
-          type="tel"
-          id="customer-phone"
-          required
-        >
+    const cartButton =
+      document.getElementById("cart-button");
 
 
-        <label for="customer-address">
-          Delivery Address
-        </label>
-
-        <textarea
-          id="customer-address"
-          rows="3"
-          required
-        ></textarea>
+    const cartOverlay =
+      document.getElementById("cart-overlay");
 
 
-        <div class="payment-box">
+    const cartClose =
+      document.getElementById("cart-close");
 
-          <h3>
-            Bank Transfer
-          </h3>
 
-          <p>
-            Please transfer your order total to:
+    const cartItems =
+      document.getElementById("cart-items");
+
+
+    const cartCount =
+      document.getElementById("cart-count");
+
+
+    const cartTotal =
+      document.getElementById("cart-total");
+
+
+    const checkoutButton =
+      document.getElementById("checkout-button");
+
+
+
+    function formatMoney(amount) {
+
+      return "₦" +
+        Number(amount).toLocaleString("en-NG");
+
+    }
+
+
+
+    function saveCart() {
+
+      localStorage.setItem(
+        "avellaCart",
+        JSON.stringify(cart)
+      );
+
+    }
+
+
+
+    function updateCart() {
+
+      let total = 0;
+
+      let itemCount = 0;
+
+
+      if (cart.length === 0) {
+
+        cartItems.innerHTML = `
+          <p class="empty-cart">
+            Your cart is empty.
           </p>
+        `;
 
-          <p>
-            <strong>
-              Bank:
-            </strong>
+        cartTotal.textContent =
+          "₦0";
 
-            OPay (OPaycom)
-          </p>
+        cartCount.textContent =
+          "0";
 
-          <p>
-            <strong>
-              Account Name:
-            </strong>
+        checkoutButton.classList.add(
+          "disabled"
+        );
 
-            AMARACHI NWANKWO
-          </p>
+        return;
 
-          <p>
-            <strong>
-              Account Number:
-            </strong>
-
-            8157550592
-          </p>
-
-        </div>
+      }
 
 
-        <label for="payment-reference">
-          Payment Reference
-        </label>
+      cartItems.innerHTML =
+        cart.map(
+          (item, index) => {
 
-        <input
-          type="text"
-          id="payment-reference"
-          placeholder="Enter your transfer reference"
-          required
-        >
+            const quantity =
+              Number(item.quantity);
 
+            const price =
+              Number(item.price);
 
-        <div class="checkout-total">
-
-          <span>
-            Order Total
-          </span>
-
-          <strong id="checkout-total">
-            ₦0
-          </strong>
-
-        </div>
+            const lineTotal =
+              price * quantity;
 
 
-        <button
-          type="submit"
-          class="submit-button"
-        >
-          Submit Order
-        </button>
+            total += lineTotal;
+
+            itemCount += quantity;
 
 
-        <p
-          id="checkout-message"
-          class="checkout-message"
-        ></p>
+            return `
 
-      </form>
+              <div class="cart-item">
 
-    </div>
+                <div class="cart-item-info">
 
-  </div>
+                  <div class="cart-item-name">
+                    ${item.name}
+                  </div>
+
+                  <div class="cart-item-price">
+                    ${formatMoney(price)} each
+                  </div>
+
+                </div>
 
 
-  <!-- SCRIPTS -->
+                <div class="quantity-controls">
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+                  <button
+                    type="button"
+                    onclick="changeQuantity(${index}, -1)"
+                  >
+                    −
+                  </button>
 
-  <script src="supabase-config.js"></script>
+                  <span class="quantity-number">
+                    ${quantity}
+                  </span>
 
-  <script src="script.js"></script>
+                  <button
+                    type="button"
+                    onclick="changeQuantity(${index}, 1)"
+                  >
+                    +
+                  </button>
+
+                </div>
+
+
+                <div class="cart-item-total">
+
+                  ${formatMoney(lineTotal)}
+
+                </div>
+
+              </div>
+
+            `;
+
+          }
+        ).join("");
+
+
+      cartTotal.textContent =
+        formatMoney(total);
+
+
+      cartCount.textContent =
+        itemCount;
+
+
+      checkoutButton.classList.remove(
+        "disabled"
+      );
+
+    }
+
+
+
+    function addToCart(name, price) {
+
+      const existingItem =
+        cart.find(
+          item => item.name === name
+        );
+
+
+      if (existingItem) {
+
+        existingItem.quantity += 1;
+
+      } else {
+
+        cart.push({
+
+          name: name,
+
+          price: Number(price),
+
+          quantity: 1
+
+        });
+
+      }
+
+
+      saveCart();
+
+      updateCart();
+
+    }
+
+
+
+    function changeQuantity(index, change) {
+
+      if (!cart[index]) {
+        return;
+      }
+
+
+      cart[index].quantity += change;
+
+
+      if (cart[index].quantity <= 0) {
+
+        cart.splice(index, 1);
+
+      }
+
+
+      saveCart();
+
+      updateCart();
+
+    }
+
+
+
+    function openCart() {
+
+      cartOverlay.classList.add(
+        "show"
+      );
+
+      updateCart();
+
+    }
+
+
+
+    function closeCart() {
+
+      cartOverlay.classList.remove(
+        "show"
+      );
+
+    }
+
+
+
+    cartButton.addEventListener(
+      "click",
+      openCart
+    );
+
+
+    cartClose.addEventListener(
+      "click",
+      closeCart
+    );
+
+
+    cartOverlay.addEventListener(
+      "click",
+      function(event) {
+
+        if (
+          event.target === cartOverlay
+        ) {
+
+          closeCart();
+
+        }
+
+      }
+    );
+
+
+
+    document
+      .querySelectorAll(".add-button")
+      .forEach(
+        function(button) {
+
+          button.addEventListener(
+            "click",
+            function() {
+
+              const name =
+                button.dataset.name;
+
+              const price =
+                Number(button.dataset.price);
+
+
+              addToCart(
+                name,
+                price
+              );
+
+
+              button.textContent =
+                "Added ✓";
+
+
+              setTimeout(
+                function() {
+
+                  button.textContent =
+                    "Add";
+
+                },
+                800
+              );
+
+            }
+          );
+
+        }
+      );
+
+
+
+    checkoutButton.addEventListener(
+      "click",
+      function(event) {
+
+        if (cart.length === 0) {
+
+          event.preventDefault();
+
+          return;
+
+        }
+
+
+        saveCart();
+
+      }
+    );
+
+
+
+    updateCart();
+
+  </script>
 
 
 </body>
-              </html>
+
+</html>
