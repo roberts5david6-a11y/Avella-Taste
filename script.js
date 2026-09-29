@@ -3,28 +3,13 @@
 // WEBSITE JAVASCRIPT
 // ============================================
 
-
-// ============================================
-// SUPABASE
-// ============================================
-
 const supabaseClient = window.supabase.createClient(
   SUPABASE_URL,
   SUPABASE_PUBLISHABLE_KEY
 );
 
-
-// ============================================
-// BACKEND
-// ============================================
-
 const BACKEND_URL =
   "https://avella-taste.onrender.com";
-
-
-// ============================================
-// SHOPPING CART
-// ============================================
 
 let cart = [];
 
@@ -49,7 +34,6 @@ function addToCart(name, price) {
   const existingItem =
     cart.find(item => item.name === name);
 
-
   if (existingItem) {
 
     existingItem.quantity += 1;
@@ -68,13 +52,10 @@ function addToCart(name, price) {
 
   }
 
-
   updateCart();
-
 
   const cartOverlay =
     document.getElementById("cart-overlay");
-
 
   if (cartOverlay) {
 
@@ -97,9 +78,7 @@ function changeQuantity(index, change) {
 
   }
 
-
   cart[index].quantity += change;
-
 
   if (cart[index].quantity <= 0) {
 
@@ -107,16 +86,13 @@ function changeQuantity(index, change) {
 
   }
 
-
   updateCart();
-
-  updateCheckoutTotal();
 
 }
 
 
 // ============================================
-// GET CART TOTAL
+// CART TOTAL
 // ============================================
 
 function getCartTotal() {
@@ -138,7 +114,7 @@ function getCartTotal() {
 
 
 // ============================================
-// GET TOTAL ITEMS
+// CART ITEM COUNT
 // ============================================
 
 function getCartItemCount() {
@@ -164,18 +140,14 @@ function getCartItemCount() {
 
 function updateCart() {
 
-
   const cartItems =
     document.getElementById("cart-items");
-
 
   const cartCount =
     document.getElementById("cart-count");
 
-
   const cartTotal =
     document.getElementById("cart-total");
-
 
   const checkoutButton =
     document.getElementById("checkout-button");
@@ -184,12 +156,9 @@ function updateCart() {
   const totalItems =
     getCartItemCount();
 
-
   const totalPrice =
     getCartTotal();
 
-
-  // CART COUNT
 
   if (cartCount) {
 
@@ -199,8 +168,6 @@ function updateCart() {
   }
 
 
-  // CART TOTAL
-
   if (cartTotal) {
 
     cartTotal.textContent =
@@ -209,8 +176,6 @@ function updateCart() {
   }
 
 
-  // CHECKOUT BUTTON
-
   if (checkoutButton) {
 
     checkoutButton.disabled =
@@ -218,8 +183,6 @@ function updateCart() {
 
   }
 
-
-  // EMPTY CART
 
   if (!cartItems) {
 
@@ -245,12 +208,9 @@ function updateCart() {
   }
 
 
-  // CART ITEMS
-
   cartItems.innerHTML = cart
 
     .map((item, index) => {
-
 
       const itemTotal =
         item.price * item.quantity;
@@ -260,82 +220,50 @@ function updateCart() {
 
         <div class="cart-item">
 
-
           <div class="cart-item-top">
-
 
             <div>
 
               <h4>
-
                 ${escapeHtml(item.name)}
-
               </h4>
 
-
               <p>
-
-                ${formatMoney(item.price)}
-                each
-
+                ${formatMoney(item.price)} each
               </p>
 
             </div>
 
-
             <strong>
-
               ${formatMoney(itemTotal)}
-
             </strong>
 
-
           </div>
-
 
 
           <div class="quantity-controls">
 
-
             <button
-
               type="button"
-
               onclick="changeQuantity(${index}, -1)"
-
-              aria-label="Decrease quantity"
-
             >
-
               −
-
             </button>
 
 
             <span>
-
               ${item.quantity}
-
             </span>
 
 
             <button
-
               type="button"
-
               onclick="changeQuantity(${index}, 1)"
-
-              aria-label="Increase quantity"
-
             >
-
               +
-
             </button>
 
-
           </div>
-
 
         </div>
 
@@ -357,13 +285,11 @@ function toggleCart() {
   const cartOverlay =
     document.getElementById("cart-overlay");
 
-
   if (!cartOverlay) {
 
     return;
 
   }
-
 
   cartOverlay.classList.toggle("active");
 
@@ -371,11 +297,10 @@ function toggleCart() {
 
 
 // ============================================
-// OPEN CHECKOUT
+// CHECKOUT
 // ============================================
 
 function openCheckout() {
-
 
   if (cart.length === 0) {
 
@@ -384,36 +309,37 @@ function openCheckout() {
   }
 
 
-  updateCheckoutTotal();
+  /*
+    Save the current cart so payment.html
+    can read it.
+  */
+
+  localStorage.setItem(
+    "avellaCart",
+    JSON.stringify(cart)
+  );
 
 
-  const checkoutOverlay =
-    document.getElementById(
-      "checkout-overlay"
-    );
+  /*
+    Go to the dedicated payment page.
+  */
 
-
-  if (checkoutOverlay) {
-
-    checkoutOverlay.classList.add("active");
-
-  }
+  window.location.href =
+    "payment.html";
 
 }
 
 
 // ============================================
-// CLOSE CHECKOUT
+// OLD CHECKOUT CLOSE FUNCTION
 // ============================================
 
 function closeCheckout() {
-
 
   const checkoutOverlay =
     document.getElementById(
       "checkout-overlay"
     );
-
 
   if (checkoutOverlay) {
 
@@ -427,24 +353,21 @@ function closeCheckout() {
 
 
 // ============================================
-// UPDATE CHECKOUT TOTAL
+// CHECKOUT TOTAL
 // ============================================
 
 function updateCheckoutTotal() {
-
 
   const checkoutTotal =
     document.getElementById(
       "checkout-total"
     );
 
-
   if (!checkoutTotal) {
 
     return;
 
   }
-
 
   checkoutTotal.textContent =
     formatMoney(getCartTotal());
@@ -453,14 +376,12 @@ function updateCheckoutTotal() {
 
 
 // ============================================
-// LOAD PRODUCTS FROM SUPABASE
+// LOAD PRODUCTS
 // ============================================
 
 async function loadProducts() {
 
-
   try {
-
 
     const {
       data,
@@ -504,12 +425,10 @@ async function loadProducts() {
 
   } catch (error) {
 
-
     console.error(
       "Supabase product loading error:",
       error
     );
-
 
   }
 
@@ -522,9 +441,7 @@ async function loadProducts() {
 
 async function loadStoreSettings() {
 
-
   try {
-
 
     const {
       data,
@@ -562,358 +479,33 @@ async function loadStoreSettings() {
 
   } catch (error) {
 
-
     console.error(
       "Supabase settings error:",
       error
     );
 
-
   }
 
 }
 
 
 // ============================================
-// CHECKOUT FORM
-// ============================================
-
-const checkoutForm =
-  document.getElementById(
-    "checkout-form"
-  );
-
-
-if (checkoutForm) {
-
-
-  checkoutForm.addEventListener(
-
-    "submit",
-
-    async function(event) {
-
-
-      event.preventDefault();
-
-
-      // MAKE SURE CART HAS ITEMS
-
-      if (cart.length === 0) {
-
-        showCheckoutMessage(
-          "Your cart is empty.",
-          true
-        );
-
-        return;
-
-      }
-
-
-      // CUSTOMER INFORMATION
-
-      const customerName =
-        document
-          .getElementById("customer-name")
-          .value
-          .trim();
-
-
-      const customerEmail =
-        document
-          .getElementById("customer-email")
-          .value
-          .trim();
-
-
-      const customerPhone =
-        document
-          .getElementById("customer-phone")
-          .value
-          .trim();
-
-
-      const customerAddress =
-        document
-          .getElementById("customer-address")
-          .value
-          .trim();
-
-
-      // OLD PAYMENT REFERENCE
-      // This will be replaced with
-      // receipt upload in the next step.
-
-      const paymentReferenceElement =
-        document.getElementById(
-          "payment-reference"
-        );
-
-
-      const paymentReference =
-        paymentReferenceElement
-          ? paymentReferenceElement.value.trim()
-          : "";
-
-
-      // REQUIRED CUSTOMER FIELDS
-
-      if (
-
-        !customerName ||
-
-        !customerEmail ||
-
-        !customerPhone ||
-
-        !customerAddress
-
-      ) {
-
-
-        showCheckoutMessage(
-
-          "Please complete your customer information.",
-
-          true
-
-        );
-
-
-        return;
-
-      }
-
-
-      showCheckoutMessage(
-
-        "Preparing your order...",
-
-        false
-
-      );
-
-
-      try {
-
-
-        // ORDER DATA
-
-        const orderData = {
-
-          customer_name:
-            customerName,
-
-          customer_email:
-            customerEmail,
-
-          customer_phone:
-            customerPhone,
-
-          delivery_address:
-            customerAddress,
-
-          payment_reference:
-            paymentReference,
-
-          items: cart.map(item => ({
-
-            product_name:
-              item.name,
-
-            quantity:
-              item.quantity,
-
-            unit_price_ngn:
-              item.price
-
-          }))
-
-        };
-
-
-        showCheckoutMessage(
-
-          "Submitting your order...",
-
-          false
-
-        );
-
-
-        // SEND TO BACKEND
-
-        const response =
-          await fetch(
-
-            `${BACKEND_URL}/api/orders`,
-
-            {
-
-              method: "POST",
-
-              headers: {
-
-                "Content-Type":
-                  "application/json"
-
-              },
-
-              body:
-                JSON.stringify(orderData)
-
-            }
-
-          );
-
-
-        const result =
-          await response.json();
-
-
-        if (!response.ok) {
-
-          throw new Error(
-
-            result.error ||
-
-            "Unable to submit order."
-
-          );
-
-        }
-
-
-        // SUCCESS
-
-        showCheckoutMessage(
-
-          `Order submitted successfully! Your order number is ${result.order_number}.`,
-
-          false
-
-        );
-
-
-        // CLEAR CART
-
-        cart = [];
-
-
-        updateCart();
-
-
-        // RESET FORM
-
-        checkoutForm.reset();
-
-
-      } catch (error) {
-
-
-        console.error(
-
-          "Checkout error:",
-
-          error
-
-        );
-
-
-        showCheckoutMessage(
-
-          error.message ||
-
-          "Something went wrong. Please try again.",
-
-          true
-
-        );
-
-      }
-
-    }
-
-  );
-
-}
-
-
-// ============================================
-// CHECKOUT MESSAGE
-// ============================================
-
-function showCheckoutMessage(
-  message,
-  isError
-) {
-
-
-  const element =
-    document.getElementById(
-      "checkout-message"
-    );
-
-
-  if (!element) {
-
-    return;
-
-  }
-
-
-  element.textContent =
-    message;
-
-
-  if (isError) {
-
-    element.style.color =
-      "#c85d7c";
-
-  } else {
-
-    element.style.color =
-      "#4d3438";
-
-  }
-
-}
-
-
-// ============================================
-// SECURITY
+// ESCAPE HTML
 // ============================================
 
 function escapeHtml(value) {
 
   return String(value)
 
-    .replaceAll(
-      "&",
-      "&amp;"
-    )
+    .replaceAll("&", "&amp;")
 
-    .replaceAll(
-      "<",
-      "&lt;"
-    )
+    .replaceAll("<", "&lt;")
 
-    .replaceAll(
-      ">",
-      "&gt;"
-    )
+    .replaceAll(">", "&gt;")
 
-    .replaceAll(
-      '"',
-      "&quot;"
-    )
+    .replaceAll('"', "&quot;")
 
-    .replaceAll(
-      "'",
-      "&#039;"
-    );
+    .replaceAll("'", "&#039;");
 
 }
 
@@ -923,24 +515,14 @@ function escapeHtml(value) {
 // ============================================
 
 document.addEventListener(
-
   "DOMContentLoaded",
-
   function() {
-
 
     updateCart();
 
-
-    updateCheckoutTotal();
-
-
     loadProducts();
-
 
     loadStoreSettings();
 
-
   }
-
 );
