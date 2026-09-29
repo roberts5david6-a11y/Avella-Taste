@@ -131,6 +131,15 @@
       color: #4a8f5c;
     }
 
+    .error-message {
+      display: none;
+      background: #fff0f0;
+      color: #b42318;
+      padding: 14px;
+      border-radius: 12px;
+      margin-bottom: 15px;
+    }
+
   </style>
 </head>
 
@@ -157,6 +166,8 @@
 
 
   <main class="payment-page">
+
+    <!-- EMPTY CART -->
 
     <div
       id="empty-message"
@@ -304,12 +315,26 @@
             <input
               type="file"
               id="payment-receipt"
-              accept="image/*,.pdf"
+              accept="image/jpeg,image/png,image/webp,application/pdf"
               required
             >
 
+            <p>
+              Maximum file size: 5MB.
+            </p>
+
           </div>
 
+
+          <!-- ERROR -->
+
+          <div
+            id="error-message"
+            class="error-message"
+          ></div>
+
+
+          <!-- SUBMIT -->
 
           <button
             type="submit"
@@ -348,7 +373,7 @@
       <h3 id="success-order-number"></h3>
 
       <p>
-        We will confirm your payment and process your order.
+        Your payment proof has been submitted for confirmation.
       </p>
 
       <a href="menu.html">
@@ -363,7 +388,7 @@
   <script>
 
     // ==========================================
-    // LOAD CART
+    // CART
     // ==========================================
 
     let cart = [];
@@ -401,6 +426,31 @@
         "payment-total"
       );
 
+    const paymentForm =
+      document.getElementById(
+        "payment-form"
+      );
+
+    const paymentButton =
+      document.getElementById(
+        "payment-button"
+      );
+
+    const errorMessage =
+      document.getElementById(
+        "error-message"
+      );
+
+    const successMessage =
+      document.getElementById(
+        "success-message"
+      );
+
+    const successOrderNumber =
+      document.getElementById(
+        "success-order-number"
+      );
+
 
     // ==========================================
     // FORMAT MONEY
@@ -410,6 +460,27 @@
 
       return "₦" +
         Number(amount).toLocaleString("en-NG");
+
+    }
+
+
+    // ==========================================
+    // ESCAPE HTML
+    // ==========================================
+
+    function escapeHtml(value) {
+
+      return String(value)
+
+        .replaceAll("&", "&amp;")
+
+        .replaceAll("<", "&lt;")
+
+        .replaceAll(">", "&gt;")
+
+        .replaceAll('"', "&quot;")
+
+        .replaceAll("'", "&#039;");
 
     }
 
@@ -482,70 +553,248 @@
 
 
     // ==========================================
-    // ESCAPE HTML
+    // SHOW ERROR
     // ==========================================
 
-    function escapeHtml(value) {
+    function showError(message) {
 
-      return String(value)
+      errorMessage.textContent =
+        message;
 
-        .replaceAll("&", "&amp;")
-
-        .replaceAll("<", "&lt;")
-
-        .replaceAll(">", "&gt;")
-
-        .replaceAll('"', "&quot;")
-
-        .replaceAll("'", "&#039;");
+      errorMessage.style.display =
+        "block";
 
     }
 
 
     // ==========================================
-    // FORM
+    // SUBMIT ORDER
     // ==========================================
 
-    document
-      .getElementById("payment-form")
-      .addEventListener(
-        "submit",
-        function(event) {
+    paymentForm.addEventListener(
+      "submit",
+      async function(event) {
 
-          event.preventDefault();
+        event.preventDefault();
 
 
-          const receipt =
-            document.getElementById(
-              "payment-receipt"
-            ).files[0];
+        errorMessage.style.display =
+          "none";
 
 
-          if (!receipt) {
+        if (!cart.length) {
 
-            alert(
-              "Please upload your payment receipt."
+          showError(
+            "Your cart is empty."
+          );
+
+          return;
+
+        }
+
+
+        const receipt =
+          document.getElementById(
+            "payment-receipt"
+          ).files[0];
+
+
+        if (!receipt) {
+
+          showError(
+            "Please upload your payment receipt."
+          );
+
+          return;
+
+        }
+
+
+        if (
+          receipt.size >
+          5 * 1024 * 1024
+        ) {
+
+          showError(
+            "Your receipt is too large. Maximum size is 5MB."
+          );
+
+          return;
+
+        }
+
+
+        const customerName =
+          document.getElementById(
+            "customer-name"
+          ).value.trim();
+
+
+        const customerEmail =
+          document.getElementById(
+            "customer-email"
+          ).value.trim();
+
+
+        const customerPhone =
+          document.getElementById(
+            "customer-phone"
+          ).value.trim();
+
+
+        const deliveryAddress =
+          document.getElementById(
+            "delivery-address"
+          ).value.trim();
+
+
+        if (
+          !customerName ||
+          !customerEmail ||
+          !customerPhone ||
+          !deliveryAddress
+        ) {
+
+          showError(
+            "Please complete all your details."
+          );
+
+          return;
+
+        }
+
+
+        // --------------------------------------
+        // DISABLE BUTTON
+        // --------------------------------------
+
+        paymentButton.disabled =
+          true;
+
+        paymentButton.textContent =
+          "Submitting payment proof...";
+
+
+        try {
+
+          // ------------------------------------
+          // CREATE FORM DATA
+          // ------------------------------------
+
+          const formData =
+            new FormData();
+
+
+          formData.append(
+            "customer_name",
+            customerName
+          );
+
+
+          formData.append(
+            "customer_email",
+            customerEmail
+          );
+
+
+          formData.append(
+            "customer_phone",
+            customerPhone
+          );
+
+
+          formData.append(
+            "delivery_address",
+            deliveryAddress
+          );
+
+
+          formData.append(
+            "items",
+            JSON.stringify(cart)
+          );
+
+
+          formData.append(
+            "payment_receipt",
+            receipt
+          );
+
+
+          // ------------------------------------
+          // SEND TO SERVER
+          // ------------------------------------
+
+          const response =
+            await fetch(
+              "/api/orders",
+              {
+                method: "POST",
+                body: formData
+              }
             );
 
-            return;
+
+          const result =
+            await response.json();
+
+
+          if (!response.ok) {
+
+            throw new Error(
+              result.error ||
+              "Unable to submit your order."
+            );
 
           }
 
 
-          /*
-            This is temporarily only confirming
-            that the receipt was selected.
+          // ------------------------------------
+          // SUCCESS
+          // ------------------------------------
 
-            We will connect the actual upload
-            to Supabase in the next step.
-          */
-
-          alert(
-            "Receipt selected successfully. The upload system will be connected next."
+          localStorage.removeItem(
+            "avellaCart"
           );
 
+
+          paymentContent.style.display =
+            "none";
+
+
+          successMessage.style.display =
+            "block";
+
+
+          successOrderNumber.textContent =
+            result.order_number;
+
+
+        } catch (error) {
+
+          console.error(
+            "Payment submission error:",
+            error
+          );
+
+
+          showError(
+            error.message ||
+            "Something went wrong. Please try again."
+          );
+
+
+          paymentButton.disabled =
+            false;
+
+
+          paymentButton.textContent =
+            "I have made payment";
+
         }
-      );
+
+      }
+    );
 
 
     // ==========================================
