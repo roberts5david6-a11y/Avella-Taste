@@ -10,12 +10,10 @@ const supabase = createClient(
   process.env.SUPABASE_SECRET_KEY
 );
 
-// Test route
 app.get("/", (req, res) => {
   res.send("Avella Taste backend is running.");
 });
 
-// Create customer order
 app.post("/api/orders", async (req, res) => {
   try {
     const {
@@ -27,7 +25,6 @@ app.post("/api/orders", async (req, res) => {
       items
     } = req.body;
 
-    // Basic validation
     if (
       !customer_name ||
       !customer_email ||
@@ -42,7 +39,6 @@ app.post("/api/orders", async (req, res) => {
       });
     }
 
-    // Get active products from Supabase
     const { data: products, error: productsError } =
       await supabase
         .from("products")
@@ -53,7 +49,6 @@ app.post("/api/orders", async (req, res) => {
       throw productsError;
     }
 
-    // Verify products and calculate the real total
     let totalAmount = 0;
     const orderItems = [];
 
@@ -84,15 +79,74 @@ app.post("/api/orders", async (req, res) => {
       orderItems.push({
         product_id: product.id,
         product_name: product.name,
-        quantity,
+        quantity: quantity,
         unit_price_ngn: product.price_ngn,
         line_total_ngn: lineTotal
       });
     }
 
-    // Generate order number
     const orderNumber =
-      "AT-" +
-      Date.now().toString();
+      "AT-" + Date.now().toString();
 
-    //
+    const { data: order, error: orderError } =
+      await supabase
+        .from("orders")
+        .insert({
+          order_number: orderNumber,
+          customer_name: customer_name,
+          customer_email: customer_email,
+          customer_phone: customer_phone,
+          delivery_address: delivery_address,
+          total_amount_ngn: totalAmount,
+          payment_status: "proof_submitted",
+          payment_reference: payment_reference
+        })
+        .select()
+        .single();
+
+    if (orderError) {
+      throw orderError;
+    }
+
+    const itemsToInsert = orderItems.map(item => ({
+      order_id: order.id,
+      product_id: item.product_id,
+      product_name: item.product_name,
+      quantity: item.quantity,
+      unit_price_ngn: item.unit_price_ngn,
+      line_total_ngn: item.line_total_ngn
+    }));
+
+    const { error: itemsError } =
+      await supabase
+        .from("order_items")
+        .insert(itemsToInsert);
+
+    if (itemsError) {
+      throw itemsError;
+    }
+
+    return res.status(201).json({
+      success: true,
+      order_number: order.order_number,
+      order_id: order.id,
+      total_amount_ngn: totalAmount,
+      payment_status: "proof_submitted"
+    });
+
+  } catch (error) {
+    console.error("Order creation error:", error);
+
+    return res.status(500).json({
+      error: "Unable to create order."
+    });
+  }
+});
+
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log(
+    `Avella Taste server running on port ${PORT}`
+  );
+});
