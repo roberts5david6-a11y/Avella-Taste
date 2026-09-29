@@ -201,11 +201,54 @@ app.post(
 
       for (const item of cartItems) {
 
+        const itemName =
+          String(
+            item.name ||
+            item.product_name ||
+            ""
+          ).trim();
+
+
+        // --------------------------------------
+        // FIND PRODUCT
+        //
+        // Supports both:
+        //
+        // "Mini Banana Bread - 1 pc"
+        //
+        // and products where:
+        //
+        // name = "Mini Banana Bread"
+        // size = "1 pc"
+        // --------------------------------------
+
         const product =
           products.find(
-            p =>
-              p.name === item.name ||
-              p.name === item.product_name
+            p => {
+
+              const databaseName =
+                String(
+                  p.name || ""
+                ).trim();
+
+              const databaseSize =
+                String(
+                  p.size || ""
+                ).trim();
+
+
+              const fullDatabaseName =
+                databaseSize
+                  ? `${databaseName} - ${databaseSize}`
+                  : databaseName;
+
+
+              return (
+                databaseName === itemName ||
+                fullDatabaseName === itemName
+              );
+
+            }
           );
 
 
@@ -214,12 +257,16 @@ app.post(
           return res.status(400).json({
 
             error:
-              `Product not found: ${item.name || item.product_name}`
+              `Product not found: ${itemName}`
 
           });
 
         }
 
+
+        // --------------------------------------
+        // CHECK QUANTITY
+        // --------------------------------------
 
         const quantity =
           Number(item.quantity);
@@ -240,12 +287,20 @@ app.post(
         }
 
 
+        // --------------------------------------
+        // CALCULATE LINE TOTAL
+        // --------------------------------------
+
         const lineTotal =
           product.price_ngn * quantity;
 
 
         totalAmount += lineTotal;
 
+
+        // --------------------------------------
+        // SAVE ORDER ITEM
+        // --------------------------------------
 
         orderItems.push({
 
