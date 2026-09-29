@@ -15,6 +15,14 @@ const supabaseClient = window.supabase.createClient(
 
 
 // ============================================
+// SECURE BACKEND URL
+// ============================================
+
+const BACKEND_URL =
+  "https://avella-taste.onrender.com";
+
+
+// ============================================
 // CART
 // ============================================
 
@@ -40,7 +48,6 @@ function addToCart(name, price) {
     item => item.name === name
   );
 
-
   if (existingItem) {
 
     existingItem.quantity += 1;
@@ -55,9 +62,7 @@ function addToCart(name, price) {
 
   }
 
-
   updateCart();
-
 
   document
     .getElementById("cart-overlay")
@@ -196,6 +201,8 @@ function changeQuantity(index, change) {
 
 
   updateCart();
+
+  updateCheckoutTotal();
 }
 
 
@@ -313,13 +320,6 @@ async function loadProducts() {
     );
 
 
-    /*
-      We will connect these database
-      products to the visual product cards
-      in the next stage.
-    */
-
-
   } catch (error) {
 
     console.error(
@@ -363,23 +363,6 @@ async function loadStoreSettings() {
       "Avella Taste settings loaded:",
       data
     );
-
-
-    /*
-      Later we will use these settings
-      to automatically display:
-
-      - Business name
-      - Phone
-      - Email
-      - Bank name
-      - Account name
-      - Account number
-
-      This means your sister can change
-      payment details without editing
-      the whole website.
-    */
 
 
   } catch (error) {
@@ -469,30 +452,6 @@ document
       }
 
 
-      /*
-        IMPORTANT:
-
-        We are NOT inserting the order
-        directly into Supabase from the
-        browser yet.
-
-        The secure server will handle this.
-
-        This prevents customers from
-        manipulating prices or orders.
-
-        The server will:
-
-        1. Verify the products.
-        2. Calculate the real total.
-        3. Create the order.
-        4. Save the order items.
-        5. Store the payment reference.
-        6. Allow payment confirmation.
-        7. Send the receipt email.
-      */
-
-
       showCheckoutMessage(
         "Preparing your order...",
         false
@@ -503,48 +462,91 @@ document
 
         const orderData = {
 
-          customer_name: customerName,
+          customer_name:
+            customerName,
 
-          customer_email: customerEmail,
+          customer_email:
+            customerEmail,
 
-          customer_phone: customerPhone,
+          customer_phone:
+            customerPhone,
 
-          delivery_address: customerAddress,
+          delivery_address:
+            customerAddress,
 
           payment_reference:
             paymentReference,
 
           items: cart.map(item => ({
 
-            product_name: item.name,
+            product_name:
+              item.name,
 
-            quantity: item.quantity,
+            quantity:
+              item.quantity,
 
-            unit_price_ngn: item.price
+            unit_price_ngn:
+              item.price
 
           }))
 
         };
 
 
-        console.log(
-          "Order ready for secure server:",
-          orderData
+        showCheckoutMessage(
+          "Submitting your order...",
+          false
         );
 
 
-        /*
-          TEMPORARY MESSAGE
+        const response =
+          await fetch(
+            `${BACKEND_URL}/api/orders`,
+            {
+              method: "POST",
 
-          The secure Render backend will
-          be connected in the next stage.
-        */
+              headers: {
+                "Content-Type":
+                  "application/json"
+              },
+
+              body:
+                JSON.stringify(orderData)
+            }
+          );
+
+
+        const result =
+          await response.json();
+
+
+        if (!response.ok) {
+
+          throw new Error(
+            result.error ||
+            "Unable to submit order."
+          );
+
+        }
 
 
         showCheckoutMessage(
-          "Your order form is ready. We are connecting the secure payment system next.",
+          `Order submitted successfully! Your order number is ${result.order_number}.`,
           false
         );
+
+
+        cart = [];
+
+
+        updateCart();
+
+
+        document
+          .getElementById(
+            "checkout-form"
+          )
+          .reset();
 
 
       } catch (error) {
@@ -556,6 +558,7 @@ document
 
 
         showCheckoutMessage(
+          error.message ||
           "Something went wrong. Please try again.",
           true
         );
@@ -586,7 +589,8 @@ function showCheckoutMessage(
   }
 
 
-  element.textContent = message;
+  element.textContent =
+    message;
 
 
   if (isError) {
@@ -611,15 +615,30 @@ function escapeHtml(value) {
 
   return String(value)
 
-    .replaceAll("&", "&amp;")
+    .replaceAll(
+      "&",
+      "&amp;"
+    )
 
-    .replaceAll("<", "&lt;")
+    .replaceAll(
+      "<",
+      "&lt;"
+    )
 
-    .replaceAll(">", "&gt;")
+    .replaceAll(
+      ">",
+      "&gt;"
+    )
 
-    .replaceAll('"', "&quot;")
+    .replaceAll(
+      '"',
+      "&quot;"
+    )
 
-    .replaceAll("'", "&#039;");
+    .replaceAll(
+      "'",
+      "&#039;"
+    );
 }
 
 
