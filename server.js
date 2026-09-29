@@ -1,4 +1,5 @@
 const express = require("express");
+const path = require("path");
 const { createClient } = require("@supabase/supabase-js");
 
 const app = express();
@@ -10,10 +11,17 @@ const supabase = createClient(
   process.env.SUPABASE_SECRET_KEY
 );
 
+// Serve the Avella Taste website
+app.use(express.static(__dirname));
+
+// Homepage
 app.get("/", (req, res) => {
-  res.send("Avella Taste backend is running.");
+  res.sendFile(
+    path.join(__dirname, "index.html")
+  );
 });
 
+// Create customer order
 app.post("/api/orders", async (req, res) => {
   try {
     const {
@@ -135,7 +143,10 @@ app.post("/api/orders", async (req, res) => {
     });
 
   } catch (error) {
-    console.error("Order creation error:", error);
+    console.error(
+      "Order creation error:",
+      error
+    );
 
     return res.status(500).json({
       error: "Unable to create order."
@@ -143,7 +154,8 @@ app.post("/api/orders", async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT =
+  process.env.PORT || 3000;
 
 app.listen(PORT, () => {
   console.log(
