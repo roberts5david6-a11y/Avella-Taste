@@ -5,7 +5,7 @@
 
 
 // ============================================
-// SUPABASE CONNECTION
+// SUPABASE
 // ============================================
 
 const supabaseClient = window.supabase.createClient(
@@ -15,7 +15,7 @@ const supabaseClient = window.supabase.createClient(
 
 
 // ============================================
-// SECURE BACKEND URL
+// BACKEND
 // ============================================
 
 const BACKEND_URL =
@@ -23,30 +23,32 @@ const BACKEND_URL =
 
 
 // ============================================
-// CART
+// SHOPPING CART
 // ============================================
 
 let cart = [];
 
 
 // ============================================
-// FORMAT NIGERIAN NAIRA
+// FORMAT MONEY
 // ============================================
 
 function formatMoney(amount) {
+
   return "₦" + Number(amount).toLocaleString("en-NG");
+
 }
 
 
 // ============================================
-// ADD PRODUCT TO CART
+// ADD TO CART
 // ============================================
 
 function addToCart(name, price) {
 
-  const existingItem = cart.find(
-    item => item.name === name
-  );
+  const existingItem =
+    cart.find(item => item.name === name);
+
 
   if (existingItem) {
 
@@ -55,127 +57,31 @@ function addToCart(name, price) {
   } else {
 
     cart.push({
+
       name: name,
+
       price: Number(price),
+
       quantity: 1
+
     });
 
   }
 
+
   updateCart();
 
-  document
-    .getElementById("cart-overlay")
-    .classList.add("active");
-}
+
+  const cartOverlay =
+    document.getElementById("cart-overlay");
 
 
-// ============================================
-// UPDATE CART
-// ============================================
+  if (cartOverlay) {
 
-function updateCart() {
+    cartOverlay.classList.add("active");
 
-  const cartItems =
-    document.getElementById("cart-items");
-
-  const cartCount =
-    document.getElementById("cart-count");
-
-  const cartTotal =
-    document.getElementById("cart-total");
-
-  const checkoutButton =
-    document.getElementById("checkout-button");
-
-
-  const totalItems = cart.reduce(
-    (total, item) =>
-      total + item.quantity,
-    0
-  );
-
-
-  const totalPrice = cart.reduce(
-    (total, item) =>
-      total +
-      item.price * item.quantity,
-    0
-  );
-
-
-  cartCount.textContent = totalItems;
-
-  cartTotal.textContent =
-    formatMoney(totalPrice);
-
-
-  checkoutButton.disabled =
-    cart.length === 0;
-
-
-  if (cart.length === 0) {
-
-    cartItems.innerHTML = `
-      <p class="empty-cart">
-        Your cart is empty.
-      </p>
-    `;
-
-    return;
   }
 
-
-  cartItems.innerHTML = cart
-    .map((item, index) => {
-
-      const itemTotal =
-        item.price * item.quantity;
-
-
-      return `
-        <div class="cart-item">
-
-          <div class="cart-item-top">
-
-            <h4>
-              ${escapeHtml(item.name)}
-            </h4>
-
-            <span class="cart-item-price">
-              ${formatMoney(itemTotal)}
-            </span>
-
-          </div>
-
-
-          <div class="quantity-controls">
-
-            <button
-              type="button"
-              onclick="changeQuantity(${index}, -1)"
-            >
-              −
-            </button>
-
-            <span>
-              ${item.quantity}
-            </span>
-
-            <button
-              type="button"
-              onclick="changeQuantity(${index}, 1)"
-            >
-              +
-            </button>
-
-          </div>
-
-        </div>
-      `;
-
-    })
-    .join("");
 }
 
 
@@ -186,7 +92,9 @@ function updateCart() {
 function changeQuantity(index, change) {
 
   if (!cart[index]) {
+
     return;
+
   }
 
 
@@ -203,6 +111,240 @@ function changeQuantity(index, change) {
   updateCart();
 
   updateCheckoutTotal();
+
+}
+
+
+// ============================================
+// GET CART TOTAL
+// ============================================
+
+function getCartTotal() {
+
+  return cart.reduce(
+
+    (total, item) => {
+
+      return total +
+        (item.price * item.quantity);
+
+    },
+
+    0
+
+  );
+
+}
+
+
+// ============================================
+// GET TOTAL ITEMS
+// ============================================
+
+function getCartItemCount() {
+
+  return cart.reduce(
+
+    (total, item) => {
+
+      return total + item.quantity;
+
+    },
+
+    0
+
+  );
+
+}
+
+
+// ============================================
+// UPDATE CART
+// ============================================
+
+function updateCart() {
+
+
+  const cartItems =
+    document.getElementById("cart-items");
+
+
+  const cartCount =
+    document.getElementById("cart-count");
+
+
+  const cartTotal =
+    document.getElementById("cart-total");
+
+
+  const checkoutButton =
+    document.getElementById("checkout-button");
+
+
+  const totalItems =
+    getCartItemCount();
+
+
+  const totalPrice =
+    getCartTotal();
+
+
+  // CART COUNT
+
+  if (cartCount) {
+
+    cartCount.textContent =
+      totalItems;
+
+  }
+
+
+  // CART TOTAL
+
+  if (cartTotal) {
+
+    cartTotal.textContent =
+      formatMoney(totalPrice);
+
+  }
+
+
+  // CHECKOUT BUTTON
+
+  if (checkoutButton) {
+
+    checkoutButton.disabled =
+      cart.length === 0;
+
+  }
+
+
+  // EMPTY CART
+
+  if (!cartItems) {
+
+    return;
+
+  }
+
+
+  if (cart.length === 0) {
+
+    cartItems.innerHTML = `
+
+      <p class="empty-cart">
+
+        Your cart is empty.
+
+      </p>
+
+    `;
+
+    return;
+
+  }
+
+
+  // CART ITEMS
+
+  cartItems.innerHTML = cart
+
+    .map((item, index) => {
+
+
+      const itemTotal =
+        item.price * item.quantity;
+
+
+      return `
+
+        <div class="cart-item">
+
+
+          <div class="cart-item-top">
+
+
+            <div>
+
+              <h4>
+
+                ${escapeHtml(item.name)}
+
+              </h4>
+
+
+              <p>
+
+                ${formatMoney(item.price)}
+                each
+
+              </p>
+
+            </div>
+
+
+            <strong>
+
+              ${formatMoney(itemTotal)}
+
+            </strong>
+
+
+          </div>
+
+
+
+          <div class="quantity-controls">
+
+
+            <button
+
+              type="button"
+
+              onclick="changeQuantity(${index}, -1)"
+
+              aria-label="Decrease quantity"
+
+            >
+
+              −
+
+            </button>
+
+
+            <span>
+
+              ${item.quantity}
+
+            </span>
+
+
+            <button
+
+              type="button"
+
+              onclick="changeQuantity(${index}, 1)"
+
+              aria-label="Increase quantity"
+
+            >
+
+              +
+
+            </button>
+
+
+          </div>
+
+
+        </div>
+
+      `;
+
+    })
+
+    .join("");
+
 }
 
 
@@ -212,9 +354,19 @@ function changeQuantity(index, change) {
 
 function toggleCart() {
 
-  document
-    .getElementById("cart-overlay")
-    .classList.toggle("active");
+  const cartOverlay =
+    document.getElementById("cart-overlay");
+
+
+  if (!cartOverlay) {
+
+    return;
+
+  }
+
+
+  cartOverlay.classList.toggle("active");
+
 }
 
 
@@ -224,17 +376,29 @@ function toggleCart() {
 
 function openCheckout() {
 
+
   if (cart.length === 0) {
+
     return;
+
   }
 
 
   updateCheckoutTotal();
 
 
-  document
-    .getElementById("checkout-overlay")
-    .classList.add("active");
+  const checkoutOverlay =
+    document.getElementById(
+      "checkout-overlay"
+    );
+
+
+  if (checkoutOverlay) {
+
+    checkoutOverlay.classList.add("active");
+
+  }
+
 }
 
 
@@ -244,24 +408,29 @@ function openCheckout() {
 
 function closeCheckout() {
 
-  document
-    .getElementById("checkout-overlay")
-    .classList.remove("active");
+
+  const checkoutOverlay =
+    document.getElementById(
+      "checkout-overlay"
+    );
+
+
+  if (checkoutOverlay) {
+
+    checkoutOverlay.classList.remove(
+      "active"
+    );
+
+  }
+
 }
 
 
 // ============================================
-// CHECKOUT TOTAL
+// UPDATE CHECKOUT TOTAL
 // ============================================
 
 function updateCheckoutTotal() {
-
-  const total = cart.reduce(
-    (sum, item) =>
-      sum +
-      item.price * item.quantity,
-    0
-  );
 
 
   const checkoutTotal =
@@ -270,12 +439,16 @@ function updateCheckoutTotal() {
     );
 
 
-  if (checkoutTotal) {
+  if (!checkoutTotal) {
 
-    checkoutTotal.textContent =
-      formatMoney(total);
+    return;
 
   }
+
+
+  checkoutTotal.textContent =
+    formatMoney(getCartTotal());
+
 }
 
 
@@ -285,22 +458,30 @@ function updateCheckoutTotal() {
 
 async function loadProducts() {
 
+
   try {
+
 
     const {
       data,
       error
     } = await supabaseClient
+
       .from("products")
+
       .select("*")
+
       .eq("active", true)
+
       .order("created_at", {
         ascending: true
       });
 
 
     if (error) {
+
       throw error;
+
     }
 
 
@@ -311,6 +492,7 @@ async function loadProducts() {
       );
 
       return;
+
     }
 
 
@@ -322,12 +504,15 @@ async function loadProducts() {
 
   } catch (error) {
 
+
     console.error(
       "Supabase product loading error:",
       error
     );
 
+
   }
+
 }
 
 
@@ -337,25 +522,35 @@ async function loadProducts() {
 
 async function loadStoreSettings() {
 
+
   try {
+
 
     const {
       data,
       error
     } = await supabaseClient
+
       .from("store_settings")
+
       .select("*")
+
       .eq("id", true)
+
       .single();
 
 
     if (error) {
+
       throw error;
+
     }
 
 
     if (!data) {
+
       return;
+
     }
 
 
@@ -367,12 +562,15 @@ async function loadStoreSettings() {
 
   } catch (error) {
 
+
     console.error(
       "Supabase settings error:",
       error
     );
 
+
   }
+
 }
 
 
@@ -380,14 +578,26 @@ async function loadStoreSettings() {
 // CHECKOUT FORM
 // ============================================
 
-document
-  .getElementById("checkout-form")
-  .addEventListener(
+const checkoutForm =
+  document.getElementById(
+    "checkout-form"
+  );
+
+
+if (checkoutForm) {
+
+
+  checkoutForm.addEventListener(
+
     "submit",
+
     async function(event) {
+
 
       event.preventDefault();
 
+
+      // MAKE SURE CART HAS ITEMS
 
       if (cart.length === 0) {
 
@@ -397,8 +607,11 @@ document
         );
 
         return;
+
       }
 
+
+      // CUSTOMER INFORMATION
 
       const customerName =
         document
@@ -428,37 +641,64 @@ document
           .trim();
 
 
-      const paymentReference =
-        document
-          .getElementById("payment-reference")
-          .value
-          .trim();
+      // OLD PAYMENT REFERENCE
+      // This will be replaced with
+      // receipt upload in the next step.
 
-
-      if (
-        !customerName ||
-        !customerEmail ||
-        !customerPhone ||
-        !customerAddress ||
-        !paymentReference
-      ) {
-
-        showCheckoutMessage(
-          "Please complete all fields.",
-          true
+      const paymentReferenceElement =
+        document.getElementById(
+          "payment-reference"
         );
 
+
+      const paymentReference =
+        paymentReferenceElement
+          ? paymentReferenceElement.value.trim()
+          : "";
+
+
+      // REQUIRED CUSTOMER FIELDS
+
+      if (
+
+        !customerName ||
+
+        !customerEmail ||
+
+        !customerPhone ||
+
+        !customerAddress
+
+      ) {
+
+
+        showCheckoutMessage(
+
+          "Please complete your customer information.",
+
+          true
+
+        );
+
+
         return;
+
       }
 
 
       showCheckoutMessage(
+
         "Preparing your order...",
+
         false
+
       );
 
 
       try {
+
+
+        // ORDER DATA
 
         const orderData = {
 
@@ -494,25 +734,37 @@ document
 
 
         showCheckoutMessage(
+
           "Submitting your order...",
+
           false
+
         );
 
 
+        // SEND TO BACKEND
+
         const response =
           await fetch(
+
             `${BACKEND_URL}/api/orders`,
+
             {
+
               method: "POST",
 
               headers: {
+
                 "Content-Type":
                   "application/json"
+
               },
 
               body:
                 JSON.stringify(orderData)
+
             }
+
           );
 
 
@@ -523,18 +775,28 @@ document
         if (!response.ok) {
 
           throw new Error(
+
             result.error ||
+
             "Unable to submit order."
+
           );
 
         }
 
 
+        // SUCCESS
+
         showCheckoutMessage(
+
           `Order submitted successfully! Your order number is ${result.order_number}.`,
+
           false
+
         );
 
+
+        // CLEAR CART
 
         cart = [];
 
@@ -542,31 +804,40 @@ document
         updateCart();
 
 
-        document
-          .getElementById(
-            "checkout-form"
-          )
-          .reset();
+        // RESET FORM
+
+        checkoutForm.reset();
 
 
       } catch (error) {
 
+
         console.error(
+
           "Checkout error:",
+
           error
+
         );
 
 
         showCheckoutMessage(
+
           error.message ||
+
           "Something went wrong. Please try again.",
+
           true
+
         );
 
       }
 
     }
+
   );
+
+}
 
 
 // ============================================
@@ -578,6 +849,7 @@ function showCheckoutMessage(
   isError
 ) {
 
+
   const element =
     document.getElementById(
       "checkout-message"
@@ -585,7 +857,9 @@ function showCheckoutMessage(
 
 
   if (!element) {
+
     return;
+
   }
 
 
@@ -604,11 +878,12 @@ function showCheckoutMessage(
       "#4d3438";
 
   }
+
 }
 
 
 // ============================================
-// BASIC HTML ESCAPING
+// SECURITY
 // ============================================
 
 function escapeHtml(value) {
@@ -639,6 +914,7 @@ function escapeHtml(value) {
       "'",
       "&#039;"
     );
+
 }
 
 
@@ -647,14 +923,24 @@ function escapeHtml(value) {
 // ============================================
 
 document.addEventListener(
+
   "DOMContentLoaded",
+
   function() {
+
 
     updateCart();
 
+
+    updateCheckoutTotal();
+
+
     loadProducts();
+
 
     loadStoreSettings();
 
+
   }
+
 );
