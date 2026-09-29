@@ -1,129 +1,232 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Avella Taste</title>
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
 
   <meta
     name="description"
-    content="Avella Taste — delicious yogurt and freshly baked mini banana bread."
+    content="Avella Taste — delicious yogurt and freshly baked mini banana bread made with love."
   >
 
+  <meta name="theme-color" content="#e98da8">
+
+  <title>Avella Taste | Delicious Treats Made With Love</title>
+
+
+  <!-- GOOGLE FONTS -->
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link
+    rel="preconnect"
+    href="https://fonts.gstatic.com"
+    crossorigin
+  >
 
   <link
     href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap"
     rel="stylesheet"
   >
 
+
+  <!-- WEBSITE CSS -->
+
   <link rel="stylesheet" href="style.css">
+
 </head>
+
 
 <body>
 
-  <!-- HEADER -->
+
+  <!-- ======================================
+       HEADER
+  ======================================= -->
+
   <header class="header">
+
     <div class="container nav">
 
-      <a href="#" class="logo">
+      <a
+        href="#"
+        class="logo"
+        aria-label="Avella Taste Home"
+      >
         Avella <span>Taste</span>
       </a>
 
+
       <button
         class="cart-button"
+        type="button"
         onclick="toggleCart()"
         aria-label="Open shopping cart"
       >
+
         🛒
-        <span id="cart-count">0</span>
+
+        <span id="cart-count">
+          0
+        </span>
+
       </button>
 
     </div>
+
   </header>
 
 
-  <!-- HERO -->
+
+  <!-- ======================================
+       MAIN CONTENT
+  ======================================= -->
+
   <main>
 
+
+    <!-- ====================================
+         HERO
+    ===================================== -->
+
     <section class="hero">
+
       <div class="container hero-content">
+
 
         <div class="hero-text">
 
-          <p class="eyebrow">MADE WITH LOVE</p>
+          <p class="eyebrow">
+            MADE WITH LOVE
+          </p>
+
 
           <h1>
             Little treats,
             <span>big smiles.</span>
           </h1>
 
+
           <p class="hero-description">
-            Delicious yogurt and freshly baked mini banana bread,
-            made especially for you.
+
+            Delicious yogurt and freshly baked
+            mini banana bread, made especially
+            for you.
+
           </p>
 
-          <a href="#menu" class="primary-button">
+
+          <a
+            href="#menu"
+            class="primary-button"
+          >
             Explore our menu
           </a>
 
         </div>
 
-        <div class="hero-decoration">
-          🍌
+
+        <div
+          class="hero-decoration"
+          aria-hidden="true"
+        >
+          🍓
         </div>
 
       </div>
+
     </section>
 
 
-    <!-- MENU -->
-    <section id="menu" class="menu-section">
+
+    <!-- ====================================
+         MENU
+    ===================================== -->
+
+    <section
+      id="menu"
+      class="menu-section"
+    >
 
       <div class="container">
 
+
+        <!-- SECTION TITLE -->
+
         <div class="section-heading">
-          <p class="eyebrow">OUR MENU</p>
+
+          <p class="eyebrow">
+            OUR MENU
+          </p>
+
 
           <h2>
             Made to make
             <span>you smile.</span>
           </h2>
 
+
           <p>
-            Choose your favourite treat and add it to your order.
+            Choose your favourite treat
+            and add it to your order.
           </p>
+
         </div>
 
 
-        <!-- YOGURT -->
+
+        <!-- =================================
+             YOGURT
+        ================================== -->
+
         <div class="category">
 
-          <h3>🥛 Yogurt & Greek Yogurt</h3>
+          <h3>
+            🥛 Yogurt & Greek Yogurt
+          </h3>
+
 
           <div class="products-grid">
 
+
+            <!-- MILKY YOGURT -->
+
             <article class="product-card">
 
-              <div class="product-image yogurt-image">
+              <div
+                class="product-image yogurt-image"
+                aria-label="Milky yogurt"
+              >
                 🥛
               </div>
 
+
               <div class="product-info">
 
-                <h4>Milky Yogurt — Plain</h4>
+                <h4>
+                  Milky Yogurt — Plain
+                </h4>
+
 
                 <p class="product-description">
                   Creamy plain milky yogurt.
                 </p>
 
+
                 <div class="product-bottom">
 
-                  <strong>₦1,500</strong>
+                  <strong>
+                    ₦1,500
+                  </strong>
+
 
                   <button
+                    type="button"
                     onclick="addToCart(
                       'Milky Yogurt — Plain 35cl',
                       1500
@@ -139,25 +242,40 @@
             </article>
 
 
+
+            <!-- GREEK 500ML -->
+
             <article class="product-card">
 
-              <div class="product-image greek-image">
+              <div
+                class="product-image greek-image"
+                aria-label="Greek yogurt"
+              >
                 🥛
               </div>
 
+
               <div class="product-info">
 
-                <h4>Greek Yogurt — 500ml</h4>
+                <h4>
+                  Greek Yogurt — 500ml
+                </h4>
+
 
                 <p class="product-description">
                   Sweetened or unsweetened.
                 </p>
 
+
                 <div class="product-bottom">
 
-                  <strong>₦5,000</strong>
+                  <strong>
+                    ₦5,000
+                  </strong>
+
 
                   <button
+                    type="button"
                     onclick="addToCart(
                       'Greek Yogurt 500ml',
                       5000
@@ -173,25 +291,40 @@
             </article>
 
 
+
+            <!-- GREEK 1L -->
+
             <article class="product-card">
 
-              <div class="product-image greek-image">
+              <div
+                class="product-image greek-image"
+                aria-label="Greek yogurt"
+              >
                 🥛
               </div>
 
+
               <div class="product-info">
 
-                <h4>Greek Yogurt — 1L</h4>
+                <h4>
+                  Greek Yogurt — 1L
+                </h4>
+
 
                 <p class="product-description">
                   Sweetened or unsweetened.
                 </p>
 
+
                 <div class="product-bottom">
 
-                  <strong>₦9,500</strong>
+                  <strong>
+                    ₦9,500
+                  </strong>
+
 
                   <button
+                    type="button"
                     onclick="addToCart(
                       'Greek Yogurt 1L',
                       9500
@@ -211,32 +344,55 @@
         </div>
 
 
-        <!-- BANANA BREAD -->
+
+        <!-- =================================
+             BANANA BREAD
+        ================================== -->
+
         <div class="category">
 
-          <h3>🍌 Mini Banana Bread</h3>
+          <h3>
+            🍌 Mini Banana Bread
+          </h3>
+
 
           <div class="products-grid">
 
+
+            <!-- ONE -->
+
             <article class="product-card">
 
-              <div class="product-image bread-image">
+              <div
+                class="product-image bread-image"
+                aria-label="Mini banana bread"
+              >
                 🍌
               </div>
 
+
               <div class="product-info">
 
-                <h4>Mini Banana Bread — 1 pc</h4>
+                <h4>
+                  Mini Banana Bread — 1 pc
+                </h4>
+
 
                 <p class="product-description">
-                  Soft and delicious homemade banana bread.
+                  Soft and delicious homemade
+                  banana bread.
                 </p>
+
 
                 <div class="product-bottom">
 
-                  <strong>₦1,000</strong>
+                  <strong>
+                    ₦1,000
+                  </strong>
+
 
                   <button
+                    type="button"
                     onclick="addToCart(
                       'Mini Banana Bread — 1 pc',
                       1000
@@ -252,25 +408,40 @@
             </article>
 
 
+
+            <!-- THREE -->
+
             <article class="product-card">
 
-              <div class="product-image bread-image">
+              <div
+                class="product-image bread-image"
+                aria-label="Mini banana bread"
+              >
                 🍌
               </div>
 
+
               <div class="product-info">
 
-                <h4>Mini Banana Bread — 3 pcs</h4>
+                <h4>
+                  Mini Banana Bread — 3 pcs
+                </h4>
+
 
                 <p class="product-description">
                   Three mini banana breads.
                 </p>
 
+
                 <div class="product-bottom">
 
-                  <strong>₦2,500</strong>
+                  <strong>
+                    ₦2,500
+                  </strong>
+
 
                   <button
+                    type="button"
                     onclick="addToCart(
                       'Mini Banana Bread — 3 pcs',
                       2500
@@ -286,25 +457,40 @@
             </article>
 
 
+
+            <!-- FOUR -->
+
             <article class="product-card">
 
-              <div class="product-image bread-image">
+              <div
+                class="product-image bread-image"
+                aria-label="Mini banana bread"
+              >
                 🍌
               </div>
 
+
               <div class="product-info">
 
-                <h4>Mini Banana Bread — Pack of 4</h4>
+                <h4>
+                  Mini Banana Bread — Pack of 4
+                </h4>
+
 
                 <p class="product-description">
                   Four mini banana breads.
                 </p>
 
+
                 <div class="product-bottom">
 
-                  <strong>₦3,500</strong>
+                  <strong>
+                    ₦3,500
+                  </strong>
+
 
                   <button
+                    type="button"
                     onclick="addToCart(
                       'Mini Banana Bread — Pack of 4',
                       3500
@@ -327,26 +513,147 @@
 
     </section>
 
+
+
+    <!-- ====================================
+         ABOUT
+    ===================================== -->
+
+    <section
+      id="about"
+      class="menu-section"
+    >
+
+      <div class="container">
+
+        <div class="section-heading">
+
+          <p class="eyebrow">
+            ABOUT AVELLA TASTE
+          </p>
+
+
+          <h2>
+            Sweet moments,
+            <span>made fresh.</span>
+          </h2>
+
+
+          <p>
+            At Avella Taste, we make delicious
+            treats with care, love and attention
+            to detail. From creamy yogurt to
+            soft mini banana bread, every order
+            is prepared to bring a little sweetness
+            to your day.
+          </p>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+
+    <!-- ====================================
+         CONTACT
+    ===================================== -->
+
+    <section
+      id="contact"
+      class="menu-section"
+    >
+
+      <div class="container">
+
+        <div class="section-heading">
+
+          <p class="eyebrow">
+            CONTACT US
+          </p>
+
+
+          <h2>
+            We'd love to
+            <span>hear from you.</span>
+          </h2>
+
+
+          <p>
+            Have a question about your order?
+            Get in touch with Avella Taste.
+          </p>
+
+
+          <p style="margin-top: 20px;">
+
+            📞
+            <a href="tel:+2348157550592">
+              +234 815 755 0592
+            </a>
+
+            <br>
+
+            ✉️
+            <a
+              href="mailto:nwankwoemmanuela25@gmail.com"
+            >
+              nwankwoemmanuela25@gmail.com
+            </a>
+
+          </p>
+
+        </div>
+
+      </div>
+
+    </section>
+
   </main>
 
 
-  <!-- CART -->
-  <div id="cart-overlay" class="cart-overlay">
 
-    <div class="cart">
+  <!-- ======================================
+       SHOPPING CART
+  ======================================= -->
+
+  <div
+    id="cart-overlay"
+    class="cart-overlay"
+  >
+
+    <div
+      class="cart"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Shopping cart"
+    >
+
 
       <div class="cart-header">
 
-        <h2>Your Order</h2>
+        <h2>
+          Your Order
+        </h2>
 
-        <button onclick="toggleCart()">
+
+        <button
+          type="button"
+          onclick="toggleCart()"
+          aria-label="Close cart"
+        >
           ✕
         </button>
 
       </div>
 
 
-      <div id="cart-items" class="cart-items">
+
+      <div
+        id="cart-items"
+        class="cart-items"
+      >
 
         <p class="empty-cart">
           Your cart is empty.
@@ -355,11 +662,15 @@
       </div>
 
 
+
       <div class="cart-footer">
 
         <div class="cart-total">
 
-          <span>Total</span>
+          <span>
+            Total
+          </span>
+
 
           <strong id="cart-total">
             ₦0
@@ -367,8 +678,10 @@
 
         </div>
 
+
         <button
           id="checkout-button"
+          type="button"
           class="primary-button full-width"
           onclick="openCheckout()"
           disabled
@@ -383,43 +696,76 @@
   </div>
 
 
-  <!-- CHECKOUT -->
-  <div id="checkout-overlay" class="checkout-overlay">
 
-    <div class="checkout">
+  <!-- ======================================
+       CHECKOUT
+  ======================================= -->
+
+  <div
+    id="checkout-overlay"
+    class="checkout-overlay"
+  >
+
+    <div
+      class="checkout"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Checkout"
+    >
+
 
       <div class="checkout-header">
 
-        <h2>Checkout</h2>
+        <h2>
+          Checkout
+        </h2>
 
-        <button onclick="closeCheckout()">
+
+        <button
+          type="button"
+          onclick="closeCheckout()"
+          aria-label="Close checkout"
+        >
           ✕
         </button>
 
       </div>
 
 
+
       <form id="checkout-form">
 
+
+        <!-- CUSTOMER NAME -->
+
         <label>
+
           Full name
 
           <input
             type="text"
             id="customer-name"
+            name="customerName"
+            autocomplete="name"
             required
-            placeholder="Your name"
+            placeholder="Your full name"
           >
 
         </label>
 
 
+
+        <!-- CUSTOMER EMAIL -->
+
         <label>
+
           Email address
 
           <input
             type="email"
             id="customer-email"
+            name="customerEmail"
+            autocomplete="email"
             required
             placeholder="you@example.com"
           >
@@ -427,12 +773,18 @@
         </label>
 
 
+
+        <!-- CUSTOMER PHONE -->
+
         <label>
+
           Phone number
 
           <input
             type="tel"
             id="customer-phone"
+            name="customerPhone"
+            autocomplete="tel"
             required
             placeholder="080..."
           >
@@ -440,11 +792,17 @@
         </label>
 
 
+
+        <!-- DELIVERY ADDRESS -->
+
         <label>
+
           Delivery address
 
           <textarea
             id="customer-address"
+            name="customerAddress"
+            autocomplete="street-address"
             required
             placeholder="Where should we deliver your order?"
           ></textarea>
@@ -452,48 +810,96 @@
         </label>
 
 
+
+        <!-- PAYMENT INFORMATION -->
+
         <div class="payment-box">
 
-          <h3>Bank Transfer</h3>
+          <h3>
+            💳 Bank Transfer
+          </h3>
+
 
           <p>
             Please transfer your order total to:
           </p>
 
+
           <p>
-            <strong>OPay (OPaycom)</strong>
+            Bank:
+            <strong>
+              OPay (OPaycom)
+            </strong>
           </p>
+
 
           <p>
             Account Name:
-            <strong>NWANKWO JONAS-FRANCIS</strong>
+            <strong>
+              NWANKWO JONAS-FRANCIS
+            </strong>
           </p>
+
 
           <p>
             Account Number:
-            <strong>8132211455</strong>
+            <strong>
+              8132211455
+            </strong>
           </p>
 
+
           <small>
-            Your payment will be verified before the order
-            is marked as paid.
+
+            After making the transfer, enter
+            your payment reference below.
+            Your payment will be verified
+            before the order is marked as paid.
+
           </small>
 
         </div>
 
 
+
+        <!-- PAYMENT REFERENCE -->
+
         <label>
+
           Payment reference
 
           <input
             type="text"
             id="payment-reference"
+            name="paymentReference"
             required
-            placeholder="Transfer reference"
+            placeholder="Enter your transfer reference"
           >
 
         </label>
 
+
+
+        <!-- ORDER TOTAL -->
+
+        <div class="payment-box">
+
+          <p>
+            <strong>
+              Amount to pay
+            </strong>
+          </p>
+
+
+          <h2 id="checkout-total">
+            ₦0
+          </h2>
+
+        </div>
+
+
+
+        <!-- SUBMIT -->
 
         <button
           type="submit"
@@ -502,6 +908,13 @@
           Submit Order
         </button>
 
+
+        <p
+          id="checkout-message"
+          style="text-align:center;"
+        ></p>
+
+
       </form>
 
     </div>
@@ -509,23 +922,42 @@
   </div>
 
 
-  <!-- FOOTER -->
+
+  <!-- ======================================
+       FOOTER
+  ======================================= -->
+
   <footer>
 
     <div class="container">
 
-      <h2>Avella Taste</h2>
+      <h2>
+        Avella Taste
+      </h2>
+
 
       <p>
         Delicious treats made with love.
       </p>
 
+
       <a href="tel:+2348157550592">
         +234 815 755 0592
       </a>
 
+
       <p>
-        © 2026 Avella Taste. All rights reserved.
+        <a
+          href="mailto:nwankwoemmanuela25@gmail.com"
+        >
+          nwankwoemmanuela25@gmail.com
+        </a>
+      </p>
+
+
+      <p>
+        © 2026 Avella Taste.
+        All rights reserved.
       </p>
 
     </div>
@@ -533,7 +965,21 @@
   </footer>
 
 
+
+  <!-- ======================================
+       SUPABASE CONFIG
+  ======================================= -->
+
+  <script src="supabase-config.js"></script>
+
+
+  <!-- ======================================
+       WEBSITE JAVASCRIPT
+  ======================================= -->
+
   <script src="script.js"></script>
 
+
 </body>
-  </html>
+
+</html>
