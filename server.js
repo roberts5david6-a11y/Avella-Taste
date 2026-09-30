@@ -474,6 +474,176 @@ app.get(
 );
 
 /*
+  CUSTOMER RECEIPT LOOKUP
+  Customers enter their order number
+  and phone number to generate their
+  receipt after payment is confirmed.
+*/
+
+app.post(
+  "/api/receipt-lookup",
+  async (req, res) => {
+    try {
+      const {
+        order_number,
+        customer_phone
+      } = req.body;
+
+      if (
+        !order_number ||
+        !customer_phone
+      ) {
+        return res.status(400).json({
+          success: false,
+          error:
+            "Please enter your order number and phone number."
+        });
+      }
+
+      const cleanOrderNumber =
+        String(order_number)
+          .trim();
+
+      const suppliedPhone =
+        normalizeWhatsAppPhone(
+          customer_phone
+        );
+
+      if (!suppliedPhone) {
+        return res.status(400).json({
+          success: false,
+          error:
+            "Please enter a valid phone number."
+        });
+      }
+
+      /*
+        Find the order by order number.
+      */
+
+      const {
+        data: order,
+        error: orderError
+      } = await supabase
+        .from("orders")
+        .select(`
+          id,
+          order_number,
+          customer_phone,
+          payment_status
+        `)
+        .eq(
+          "order_number",
+          cleanOrderNumber
+        )
+        .maybeSingle();
+
+      /*
+        Use the same response for
+        an invalid order or phone number.
+        This prevents exposing whether
+        an order exists.
+      */
+
+      if (
+        orderError ||
+        !order
+      ) {
+        return res.status(404).json({
+          success: false,
+          error:
+            "Order not found."
+        });
+      }
+
+      const storedPhone =
+        normalizeWhatsAppPhone(
+          order.customer_phone
+        );
+
+      if (
+        !storedPhone ||
+        storedPhone !== suppliedPhone
+      ) {
+        return res.status(404).json({
+          success: false,
+          error:
+            "Order not found."
+        });
+      }
+
+      /*
+        Payment proof has been submitted
+        but the sister has not confirmed
+        the payment yet.
+      */
+
+      if (
+        order.payment_status ===
+        "proof_submitted"
+      ) {
+        return res.json({
+          success: false,
+          payment_status:
+            "proof_submitted",
+          message:
+            "Your payment proof has been received and is still being reviewed."
+        });
+      }
+
+      /*
+        Payment has not been confirmed.
+      */
+
+      if (
+        order.payment_status !==
+        "paid"
+      ) {
+        return res.json({
+          success: false,
+          payment_status:
+            order.payment_status,
+          message:
+            "Your payment has not been confirmed yet."
+        });
+      }
+
+      /*
+        Payment is confirmed.
+        Generate a secure receipt URL.
+      */
+
+      const receiptUrl =
+        buildReceiptUrl(
+          req,
+          order.id
+        );
+
+      res.json({
+        success: true,
+        payment_status:
+          "paid",
+        receipt_url:
+          receiptUrl
+      });
+
+    } catch (error) {
+
+      console.error(
+        "Receipt lookup error:",
+        error
+      );
+
+      res.status(500).json({
+        success: false,
+        error:
+          "Could not check your receipt right now."
+      });
+    }
+  }
+);
+
+/*
   CUSTOMER RECEIPT PAGE
 */
 
