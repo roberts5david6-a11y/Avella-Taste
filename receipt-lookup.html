@@ -127,9 +127,9 @@
       margin-top: 20px;
       padding: 14px;
       border-radius: 12px;
-      display: none;
       line-height: 1.5;
       font-size: 14px;
+      display: none;
     }
 
     .message.success {
@@ -208,6 +208,7 @@
         type="text"
         id="orderNumber"
         placeholder="Enter your order number"
+        autocomplete="off"
         required
       >
 
@@ -219,6 +220,7 @@
         type="tel"
         id="phone"
         placeholder="Enter the phone number used for your order"
+        autocomplete="tel"
         required
       >
 
@@ -237,88 +239,155 @@
   </div>
 
   <script>
-    const form = document.getElementById("receiptForm");
-    const message = document.getElementById("message");
-    const submitButton = document.getElementById("submitButton");
+    document.addEventListener("DOMContentLoaded", function () {
 
-    form.addEventListener("submit", async function(event) {
-      event.preventDefault();
+      const form = document.getElementById("receiptForm");
+      const message = document.getElementById("message");
+      const submitButton = document.getElementById("submitButton");
 
-      const orderNumber =
-        document.getElementById("orderNumber").value.trim();
-
-      const phone =
-        document.getElementById("phone").value.trim();
-
-      message.className = "message";
-      message.textContent = "";
-      message.style.display = "none";
-
-      submitButton.disabled = true;
-      submitButton.textContent = "Checking...";
-
-      try {
-        const response = await fetch("/api/receipt-lookup", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            order_number: orderNumber,
-            customer_phone: phone
-          })
-        });
-
-        const data = await response.json();
-
-        if (data.success && data.receipt_url) {
-          message.className = "message success";
-
-          message.innerHTML = `
-            <strong>Payment Confirmed ✓</strong><br>
-            Your receipt is ready.
-            <a
-              href="${data.receipt_url}"
-              class="receipt-button"
-            >
-              View & Download Receipt
-            </a>
-          `;
-
-          return;
-        }
-
-        if (data.payment_status === "proof_submitted") {
-          message.className = "message pending";
-
-          message.innerHTML = `
-            <strong>Payment Proof Received</strong><br>
-            Your payment is still being reviewed.
-            Please check again after your payment has been confirmed.
-          `;
-
-          return;
-        }
-
-        message.className = "message error";
-
-        message.innerHTML = `
-          <strong>Order not found</strong><br>
-          Please check your order number and phone number and try again.
-        `;
-
-      } catch (error) {
-        message.className = "message error";
-
-        message.innerHTML = `
-          <strong>Something went wrong.</strong><br>
-          Please check your internet connection and try again.
-        `;
-
-      } finally {
-        submitButton.disabled = false;
-        submitButton.textContent = "Generate My Receipt";
+      function showMessage(type, html) {
+        message.className = "message " + type;
+        message.innerHTML = html;
+        message.style.display = "block";
       }
+
+      form.addEventListener("submit", async function (event) {
+
+        event.preventDefault();
+
+        const orderNumber =
+          document.getElementById("orderNumber").value.trim();
+
+        const phone =
+          document.getElementById("phone").value.trim();
+
+        if (!orderNumber || !phone) {
+          showMessage(
+            "error",
+            "<strong>Please enter both details.</strong><br>" +
+            "Enter your order number and phone number."
+          );
+          return;
+        }
+
+        submitButton.disabled = true;
+        submitButton.textContent = "Checking...";
+
+        showMessage(
+          "pending",
+          "<strong>Checking your order...</strong><br>" +
+          "Please wait a moment."
+        );
+
+        try {
+
+          const response = await fetch(
+            window.location.origin + "/api/receipt-lookup",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+              },
+              body: JSON.stringify({
+                order_number: orderNumber,
+                customer_phone: phone
+              })
+            }
+          );
+
+          const responseText = await response.text();
+
+          let data = {};
+
+          try {
+            data = JSON.parse(responseText);
+          } catch (parseError) {
+            throw new Error(
+              "The server returned an unexpected response."
+            );
+          }
+
+          if (data.success && data.receipt_url) {
+
+            showMessage(
+              "success",
+              `
+                <strong>Payment Confirmed ✓</strong><br>
+                Your Avella Taste receipt is ready.
+
+                <a
+                  href="${data.receipt_url}"
+                  class="receipt-button"
+                >
+                  View & Download Receipt
+                </a>
+              `
+            );
+
+            return;
+          }
+
+          if (data.payment_status === "proof_submitted") {
+
+            showMessage(
+              "pending",
+              `
+                <strong>Payment Proof Received</strong><br>
+                Your payment proof has been received and is still
+                being reviewed. Please check again after your payment
+                has been confirmed.
+              `
+            );
+
+            return;
+          }
+
+          if (data.payment_status === "pending") {
+
+            showMessage(
+              "pending",
+              `
+                <strong>Payment Still Pending</strong><br>
+                Your order has not been confirmed as paid yet.
+                Please check again later.
+              `
+            );
+
+            return;
+          }
+
+          showMessage(
+            "error",
+            `
+              <strong>Order not found</strong><br>
+              Please check your order number and phone number
+              and try again.
+            `
+          );
+
+        } catch (error) {
+
+          console.error("Receipt lookup error:", error);
+
+          showMessage(
+            "error",
+            `
+              <strong>Connection problem</strong><br>
+              We could not check your order right now.
+              Please try again.
+            `
+          );
+
+        } finally {
+
+          submitButton.disabled = false;
+          submitButton.textContent = "Generate My Receipt";
+
+        }
+
+      });
+
     });
   </script>
 
