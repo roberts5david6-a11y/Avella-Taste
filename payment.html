@@ -131,6 +131,29 @@
       color: #4a8f5c;
     }
 
+    .success-message .waiting-message {
+      background: #fff8e8;
+      color: #80611c;
+      border: 1px solid #ead59b;
+      border-radius: 14px;
+      padding: 18px;
+      margin: 20px 0;
+      line-height: 1.6;
+    }
+
+    .receipt-button {
+      display: block;
+      width: 100%;
+      box-sizing: border-box;
+      margin-top: 15px;
+      padding: 15px;
+      border-radius: 14px;
+      background: #7d3f5c;
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
     .error-message {
       display: none;
       background: #fff0f0;
@@ -359,7 +382,7 @@
     >
 
       <h2>
-        Payment proof submitted!
+        Payment proof submitted! ✓
       </h2>
 
       <p>
@@ -372,9 +395,38 @@
 
       <h3 id="success-order-number"></h3>
 
-      <p>
-        Your payment proof has been submitted for confirmation.
-      </p>
+
+      <div class="waiting-message">
+
+        <strong>
+          Please hold for up to 5 minutes.
+        </strong>
+
+        <br><br>
+
+        Your payment proof has been received.
+        We are confirming your payment and preparing
+        your receipt.
+
+        <br><br>
+
+        Once your payment has been confirmed,
+        you can generate your receipt using the
+        button below.
+
+      </div>
+
+
+      <a
+        href="receipt-lookup.html"
+        class="receipt-button"
+      >
+        🧾 Generate / View My Receipt
+      </a>
+
+
+      <br>
+
 
       <a href="menu.html">
         Continue Shopping
@@ -806,4 +858,4 @@
   </script>
 
 </body>
-</html>
+  </html>
