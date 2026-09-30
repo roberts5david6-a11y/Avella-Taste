@@ -19,10 +19,50 @@ const supabase = createClient(
 
 
 // ============================================
+// AVELLA TASTE PRODUCT CATALOG
+// ============================================
+
+const PRODUCT_CATALOG = {
+
+  "Milky Yogurt (Plain) - 35cl": {
+    name: "Milky Yogurt (Plain) - 35cl",
+    price: 1500
+  },
+
+  "Greek Yogurt - 500ml": {
+    name: "Greek Yogurt - 500ml",
+    price: 5000
+  },
+
+  "Greek Yogurt - 1L": {
+    name: "Greek Yogurt - 1L",
+    price: 9500
+  },
+
+  "Mini Banana Bread - 1 pc": {
+    name: "Mini Banana Bread - 1 pc",
+    price: 1000
+  },
+
+  "Mini Banana Bread - 3 pcs": {
+    name: "Mini Banana Bread - 3 pcs",
+    price: 2500
+  },
+
+  "Mini Banana Bread - Pack of 4": {
+    name: "Mini Banana Bread - Pack of 4",
+    price: 3500
+  }
+
+};
+
+
+// ============================================
 // RECEIPT UPLOAD
 // ============================================
 
 const upload = multer({
+
   storage: multer.memoryStorage(),
 
   limits: {
@@ -76,209 +116,62 @@ app.get("/", (req, res) => {
 
 
 // ============================================
-// NORMALIZE TEXT
+// NORMALIZE PRODUCT NAME
 // ============================================
 
-function normalizeText(value) {
+function normalizeProductName(value) {
 
   return String(value || "")
+
     .toLowerCase()
+
     .trim()
+
     .replace(/[–—]/g, "-")
+
     .replace(/\s+/g, " ")
-    .replace(/\bpieces\b/g, "pc")
+
+    .replace(/\bpieces\b/g, "pcs")
+
     .replace(/\bpiece\b/g, "pc")
-    .replace(/\bpcs\b/g, "pc")
+
     .replace(/\bmilliliters\b/g, "ml")
+
     .replace(/\bmillilitres\b/g, "ml")
-    .replace(/\bliters\b/g, "l")
+
     .replace(/\blitres\b/g, "l")
+
+    .replace(/\blitres\b/g, "l")
+
     .replace(/\blitre\b/g, "l")
+
     .replace(/\bliter\b/g, "l")
+
     .replace(/\s*-\s*/g, "-");
 
 }
 
 
 // ============================================
-// REMOVE EXTRA DESCRIPTION
+// FIND CATALOG PRODUCT
 // ============================================
 
-function normalizeProductName(value) {
+function findCatalogProduct(cartName) {
 
-  return normalizeText(value)
-
-    // Remove things such as:
-    // (Plain)
-    // (Sweetened)
-    // (Unsweetened)
-
-    .replace(/\([^)]*\)/g, "")
-
-    .replace(/\s+/g, " ")
-
-    .trim();
-
-}
+  const normalizedCartName =
+    normalizeProductName(cartName);
 
 
-// ============================================
-// NORMALIZE SIZE
-// ============================================
-
-function normalizeSize(value) {
-
-  return normalizeText(value)
-
-    .replace(/\s+/g, "")
-
-    .replace(/^(\d+)pieces?$/, "$1pc")
-
-    .replace(/^(\d+)pcs$/, "$1pc");
-
-}
-
-
-// ============================================
-// FIND PRODUCT
-// ============================================
-
-function findMatchingProduct(products, cartItem) {
-
-  const cartName =
-    String(
-      cartItem.name ||
-      cartItem.product_name ||
-      ""
-    ).trim();
-
-
-  const cartFull =
-    normalizeText(cartName);
-
-
-  // ------------------------------------------
-  // SPLIT CART NAME
-  //
-  // Example:
-  //
-  // Milky Yogurt (Plain) - 35cl
-  //
-  // becomes:
-  //
-  // name = Milky Yogurt (Plain)
-  // size = 35cl
-  // ------------------------------------------
-
-  const parts =
-    cartFull.split("-");
-
-
-  let cartNamePart =
-    parts[0] || cartFull;
-
-
-  let cartSizePart =
-    parts.slice(1).join("-");
-
-
-  cartNamePart =
-    normalizeProductName(
-      cartNamePart
-    );
-
-
-  cartSizePart =
-    normalizeSize(
-      cartSizePart
-    );
-
-
-  // ------------------------------------------
-  // TRY EVERY ACTIVE PRODUCT
-  // ------------------------------------------
-
-  for (const product of products) {
-
-    const databaseName =
-      normalizeProductName(
-        product.name
-      );
-
-
-    const databaseSize =
-      normalizeSize(
-        product.size
-      );
-
-
-    const databaseFull =
-      normalizeText(
-        `${product.name} ${
-          product.size
-            ? "- " + product.size
-            : ""
-        }`
-      );
-
-
-    // ----------------------------------------
-    // MATCH 1
-    // EXACT FULL NAME
-    // ----------------------------------------
+  for (
+    const key of Object.keys(PRODUCT_CATALOG)
+  ) {
 
     if (
-      databaseFull === cartFull
+      normalizeProductName(key) ===
+      normalizedCartName
     ) {
 
-      return product;
-
-    }
-
-
-    // ----------------------------------------
-    // MATCH 2
-    // NAME + SIZE
-    // ----------------------------------------
-
-    if (
-      databaseName === cartNamePart &&
-      databaseSize === cartSizePart
-    ) {
-
-      return product;
-
-    }
-
-
-    // ----------------------------------------
-    // MATCH 3
-    // CART NAME CONTAINS DATABASE NAME
-    // WITH SAME SIZE
-    // ----------------------------------------
-
-    if (
-      cartNamePart.includes(databaseName) &&
-      databaseSize === cartSizePart
-    ) {
-
-      return product;
-
-    }
-
-
-    // ----------------------------------------
-    // MATCH 4
-    // DATABASE NAME CONTAINS CART NAME
-    // WITH SAME SIZE
-    // ----------------------------------------
-
-    if (
-      databaseName.includes(cartNamePart) &&
-      databaseSize === cartSizePart
-    ) {
-
-      return product;
+      return PRODUCT_CATALOG[key];
 
     }
 
@@ -286,6 +179,63 @@ function findMatchingProduct(products, cartItem) {
 
 
   return null;
+
+}
+
+
+// ============================================
+// FIND DATABASE PRODUCT
+// ============================================
+
+function findDatabaseProduct(
+  products,
+  catalogProduct
+) {
+
+  if (!Array.isArray(products)) {
+
+    return null;
+
+  }
+
+
+  const targetName =
+    normalizeProductName(
+      catalogProduct.name
+    );
+
+
+  return (
+    products.find(product => {
+
+      const databaseFullName =
+        normalizeProductName(
+
+          `${product.name || ""} ${
+            product.size
+              ? "- " + product.size
+              : ""
+          }`
+
+        );
+
+
+      const databaseName =
+        normalizeProductName(
+          product.name
+        );
+
+
+      return (
+        databaseFullName ===
+        targetName ||
+
+        databaseName ===
+        targetName
+      );
+
+    }) || null
+  );
 
 }
 
@@ -311,7 +261,7 @@ app.post(
 
 
       // ----------------------------------------
-      // CHECK REQUIRED INFORMATION
+      // REQUIRED INFORMATION
       // ----------------------------------------
 
       if (
@@ -345,7 +295,7 @@ app.post(
 
 
       // ----------------------------------------
-      // READ CART ITEMS
+      // READ CART
       // ----------------------------------------
 
       let cartItems;
@@ -383,7 +333,7 @@ app.post(
 
 
       // ----------------------------------------
-      // GET ACTIVE PRODUCTS
+      // GET PRODUCTS FROM SUPABASE
       // ----------------------------------------
 
       const {
@@ -393,9 +343,7 @@ app.post(
 
         .from("products")
 
-        .select("*")
-
-        .eq("active", true);
+        .select("*");
 
 
       if (productsError) {
@@ -416,22 +364,30 @@ app.post(
 
       for (const item of cartItems) {
 
-        const product =
-          findMatchingProduct(
-            products,
-            item
+        const cartName =
+          String(
+            item.name ||
+            item.product_name ||
+            ""
+          ).trim();
+
+
+        // --------------------------------------
+        // FIND PRODUCT IN OUR FIXED CATALOG
+        // --------------------------------------
+
+        const catalogProduct =
+          findCatalogProduct(
+            cartName
           );
 
 
-        if (!product) {
+        if (!catalogProduct) {
 
           return res.status(400).json({
 
             error:
-              `Product not found: ${
-                item.name ||
-                item.product_name
-              }`
+              `Product not found: ${cartName}`
 
           });
 
@@ -462,12 +418,26 @@ app.post(
 
 
         // --------------------------------------
-        // CALCULATE LINE TOTAL
+        // TRY TO FIND DATABASE PRODUCT
         // --------------------------------------
 
+        const databaseProduct =
+          findDatabaseProduct(
+            products,
+            catalogProduct
+          );
+
+
+        // --------------------------------------
+        // ALWAYS USE OUR SERVER PRICE
+        // --------------------------------------
+
+        const unitPrice =
+          catalogProduct.price;
+
+
         const lineTotal =
-          product.price_ngn *
-          quantity;
+          unitPrice * quantity;
 
 
         totalAmount +=
@@ -481,16 +451,18 @@ app.post(
         orderItems.push({
 
           product_id:
-            product.id,
+            databaseProduct
+              ? databaseProduct.id
+              : null,
 
           product_name:
-            product.name,
+            catalogProduct.name,
 
           quantity:
             quantity,
 
           unit_price_ngn:
-            product.price_ngn,
+            unitPrice,
 
           line_total_ngn:
             lineTotal
@@ -544,7 +516,6 @@ app.post(
               req.file.mimetype,
 
             upsert: false
-
           }
         );
 
@@ -621,29 +592,27 @@ app.post(
       // ========================================
 
       const itemsToInsert =
-        orderItems.map(
-          item => ({
+        orderItems.map(item => ({
 
-            order_id:
-              order.id,
+          order_id:
+            order.id,
 
-            product_id:
-              item.product_id,
+          product_id:
+            item.product_id,
 
-            product_name:
-              item.product_name,
+          product_name:
+            item.product_name,
 
-            quantity:
-              item.quantity,
+          quantity:
+            item.quantity,
 
-            unit_price_ngn:
-              item.unit_price_ngn,
+          unit_price_ngn:
+            item.unit_price_ngn,
 
-            line_total_ngn:
-              item.line_total_ngn
+          line_total_ngn:
+            item.line_total_ngn
 
-          })
-        );
+        }));
 
 
       const {
@@ -727,8 +696,7 @@ app.use(
     ) {
 
       if (
-        error.code ===
-        "LIMIT_FILE_SIZE"
+        error.code === "LIMIT_FILE_SIZE"
       ) {
 
         return res.status(400).json({
