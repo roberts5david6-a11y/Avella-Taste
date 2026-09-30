@@ -64,6 +64,10 @@
       cursor: pointer;
     }
 
+    button:hover {
+      opacity: 0.9;
+    }
+
     .order-card {
       background: white;
       border-radius: 16px;
@@ -122,6 +126,36 @@
       margin-top: 10px;
     }
 
+    .receipt-section {
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px solid #f1dce4;
+    }
+
+    .receipt-section h3 {
+      margin: 0 0 10px;
+      font-size: 16px;
+    }
+
+    .receipt-button {
+      display: inline-block;
+      text-decoration: none;
+      background: #d96b93;
+      color: white;
+      padding: 11px 16px;
+      border-radius: 10px;
+      font-size: 14px;
+    }
+
+    .receipt-button:hover {
+      opacity: 0.9;
+    }
+
+    .no-receipt {
+      color: #8a6874;
+      font-size: 14px;
+    }
+
     .empty {
       background: white;
       padding: 35px 20px;
@@ -153,7 +187,9 @@
     </div>
 
     <div id="orders">
-      <div class="loading">Loading orders...</div>
+      <div class="loading">
+        Loading orders...
+      </div>
     </div>
 
   </main>
@@ -191,10 +227,39 @@
 
           const items = order.order_items || [];
 
+          let receiptHTML = "";
+
+          if (order.payment_proof_signed_url) {
+            receiptHTML = `
+              <div class="receipt-section">
+                <h3>Payment Receipt</h3>
+
+                <a
+                  class="receipt-button"
+                  href="${escapeHtml(order.payment_proof_signed_url)}"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  View Payment Receipt
+                </a>
+              </div>
+            `;
+          } else {
+            receiptHTML = `
+              <div class="receipt-section">
+                <h3>Payment Receipt</h3>
+                <div class="no-receipt">
+                  No payment receipt uploaded.
+                </div>
+              </div>
+            `;
+          }
+
           return `
             <div class="order-card">
 
               <div class="order-header">
+
                 <div class="order-number">
                   ${escapeHtml(order.order_number)}
                 </div>
@@ -202,9 +267,11 @@
                 <div class="status">
                   ${escapeHtml(order.payment_status)}
                 </div>
+
               </div>
 
               <div class="customer">
+
                 <strong>Customer:</strong>
                 ${escapeHtml(order.customer_name)}
                 <br>
@@ -219,12 +286,14 @@
 
                 <strong>Address:</strong>
                 ${escapeHtml(order.delivery_address || "Not provided")}
+
               </div>
 
               <div class="items">
 
                 ${items.map(item => `
                   <div class="item">
+
                     <span>
                       ${escapeHtml(item.product_name)}
                       × ${item.quantity}
@@ -233,14 +302,18 @@
                     <strong>
                       ₦${Number(item.line_total_ngn).toLocaleString()}
                     </strong>
+
                   </div>
                 `).join("")}
 
               </div>
 
               <div class="total">
-                Total: ₦${Number(order.total_amount_ngn).toLocaleString()}
+                Total:
+                ₦${Number(order.total_amount_ngn).toLocaleString()}
               </div>
+
+              ${receiptHTML}
 
             </div>
           `;
@@ -248,12 +321,19 @@
         }).join("");
 
       } catch (error) {
+
         container.innerHTML = `
           <div class="empty">
+
             <h3>Could not load orders</h3>
-            <p>${escapeHtml(error.message)}</p>
+
+            <p>
+              ${escapeHtml(error.message)}
+            </p>
+
           </div>
         `;
+
       }
     }
 
