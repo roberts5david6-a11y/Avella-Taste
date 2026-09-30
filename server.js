@@ -48,13 +48,6 @@ const upload = multer({
 
 app.use(express.json());
 
-/*
-  Avella Taste product catalogue.
-
-  These prices are controlled by the server,
-  so customers cannot change product prices
-  from their browser.
-*/
 const PRODUCT_CATALOG = {
   "Milky Yogurt (Plain) - 35cl": {
     name: "Milky Yogurt (Plain) - 35cl",
@@ -107,22 +100,17 @@ function findCatalogProduct(name) {
 }
 
 /*
-  Admin authentication.
-
-  The browser will show its normal username/password
-  box when the admin page is opened.
-
-  Username:
-  admin
-
-  Password:
-  the ADMIN_PASSWORD stored in Render.
+  ADMIN AUTHENTICATION
 */
 function requireAdmin(req, res, next) {
   const authorization = req.headers.authorization || "";
 
   if (!authorization.startsWith("Basic ")) {
-    res.setHeader("WWW-Authenticate", 'Basic realm="Avella Taste Admin"');
+    res.setHeader(
+      "WWW-Authenticate",
+      'Basic realm="Avella Taste Admin"'
+    );
+
     return res.status(401).send("Admin login required.");
   }
 
@@ -131,24 +119,41 @@ function requireAdmin(req, res, next) {
   let decoded;
 
   try {
-    decoded = Buffer.from(encoded, "base64").toString("utf8");
+    decoded = Buffer
+      .from(encoded, "base64")
+      .toString("utf8");
   } catch (error) {
-    res.setHeader("WWW-Authenticate", 'Basic realm="Avella Taste Admin"');
+    res.setHeader(
+      "WWW-Authenticate",
+      'Basic realm="Avella Taste Admin"'
+    );
+
     return res.status(401).send("Invalid admin login.");
   }
 
   const separator = decoded.indexOf(":");
 
   if (separator === -1) {
-    res.setHeader("WWW-Authenticate", 'Basic realm="Avella Taste Admin"');
+    res.setHeader(
+      "WWW-Authenticate",
+      'Basic realm="Avella Taste Admin"'
+    );
+
     return res.status(401).send("Invalid admin login.");
   }
 
   const username = decoded.slice(0, separator);
   const password = decoded.slice(separator + 1);
 
-  if (username !== "admin" || password !== ADMIN_PASSWORD) {
-    res.setHeader("WWW-Authenticate", 'Basic realm="Avella Taste Admin"');
+  if (
+    username !== "admin" ||
+    password !== ADMIN_PASSWORD
+  ) {
+    res.setHeader(
+      "WWW-Authenticate",
+      'Basic realm="Avella Taste Admin"'
+    );
+
     return res.status(401).send("Incorrect admin login.");
   }
 
@@ -156,18 +161,21 @@ function requireAdmin(req, res, next) {
 }
 
 /*
-  Protect the admin page itself.
+  ADMIN PAGE
 */
 app.get("/admin.html", requireAdmin, (req, res) => {
   res.sendFile(__dirname + "/admin.html");
 });
 
 /*
-  Admin orders API.
+  GET ALL ORDERS
 */
 app.get("/api/admin/orders", requireAdmin, async (req, res) => {
   try {
-    const { data: orders, error } = await supabase
+    const {
+      data: orders,
+      error
+    } = await supabase
       .from("orders")
       .select(`
         *,
@@ -188,16 +196,20 @@ app.get("/api/admin/orders", requireAdmin, async (req, res) => {
     const safeOrders = [];
 
     for (const order of orders || []) {
+
       let paymentProofUrl = null;
 
       if (order.payment_proof_url) {
-        const { data: signedData, error: signedError } =
-          await supabase.storage
-            .from("payment-receipts")
-            .createSignedUrl(
-              order.payment_proof_url,
-              60 * 60
-            );
+
+        const {
+          data: signedData,
+          error: signedError
+        } = await supabase.storage
+          .from("payment-receipts")
+          .createSignedUrl(
+            order.payment_proof_url,
+            60 * 60
+          );
 
         if (!signedError && signedData) {
           paymentProofUrl = signedData.signedUrl;
@@ -215,6 +227,7 @@ app.get("/api/admin/orders", requireAdmin, async (req, res) => {
     });
 
   } catch (error) {
+
     console.error("Admin endpoint error:", error);
 
     res.status(500).json({
@@ -224,13 +237,117 @@ app.get("/api/admin/orders", requireAdmin, async (req, res) => {
 });
 
 /*
-  Customer order submission.
+  CONFIRM PAYMENT
+*/
+app.post(
+  "/api/admin/orders/:orderId/confirm-payment",
+  requireAdmin,
+  async (req, res) => {
+
+    try {
+
+      const orderId = req.params.orderId;
+
+      if (!orderId) {
+        return res.status(400).json({
+          error: "Missing order ID."
+        });
+      }
+
+      /*
+        First check that the order exists.
+      */
+      const {
+        data: existingOrder,
+        error: findError
+      } = await supabase
+        .from("orders")
+        .select("*")
+        .eq("id", orderId)
+        .single();
+
+      if (findError || !existingOrder) {
+
+        console.error(
+          "Order lookup error:",
+          findError
+        );
+
+        return res.status(404).json({
+          error: "Order not found."
+        });
+      }
+
+      /*
+        Do not confirm an already cancelled order.
+      */
+      if (existingOrder.payment_status === "cancelled") {
+
+        return res.status(400).json({
+          error: "This order has been cancelled."
+        });
+      }
+
+      /*
+        Mark payment as paid.
+      */
+      const {
+        data: updatedOrder,
+        error: updateError
+      } = await supabase
+        .from("orders")
+        .update({
+          payment_status: "paid",
+          paid_at: new Date().toISOString()
+        })
+        .eq("id", orderId)
+        .select()
+        .single();
+
+      if (updateError) {
+
+        console.error(
+          "Payment confirmation error:",
+          updateError
+        );
+
+        return res.status(500).json({
+          error: "Could not confirm payment."
+        });
+      }
+
+      res.json({
+        success: true,
+        message: "Payment confirmed.",
+        order: updatedOrder
+      });
+
+    } catch (error) {
+
+      console.error(
+        "Confirm payment error:",
+        error
+      );
+
+      res.status(500).json({
+        error:
+          error.message ||
+          "Could not confirm payment."
+      });
+    }
+  }
+);
+
+/*
+  CUSTOMER ORDER SUBMISSION
 */
 app.post(
   "/api/orders",
   upload.single("payment_receipt"),
   async (req, res) => {
+
     try {
+
       const {
         customer_name,
         customer_email,
@@ -246,13 +363,15 @@ app.post(
         !items
       ) {
         return res.status(400).json({
-          error: "Missing required order information."
+          error:
+            "Missing required order information."
         });
       }
 
       if (!req.file) {
         return res.status(400).json({
-          error: "Please upload your payment receipt."
+          error:
+            "Please upload your payment receipt."
         });
       }
 
@@ -266,15 +385,17 @@ app.post(
         });
       }
 
-      if (!Array.isArray(cartItems) || cartItems.length === 0) {
+      if (
+        !Array.isArray(cartItems) ||
+        cartItems.length === 0
+      ) {
         return res.status(400).json({
           error: "Your cart is empty."
         });
       }
 
       /*
-        Get products from Supabase so we can use their IDs
-        when available.
+        Get database products.
       */
       const {
         data: databaseProducts,
@@ -284,7 +405,11 @@ app.post(
         .select("*");
 
       if (productsError) {
-        console.error("Products lookup error:", productsError);
+
+        console.error(
+          "Products lookup error:",
+          productsError
+        );
 
         return res.status(500).json({
           error: "Could not verify products."
@@ -292,73 +417,96 @@ app.post(
       }
 
       let totalAmount = 0;
+
       const orderItems = [];
 
       for (const item of cartItems) {
+
         const itemName =
           item.name ||
           item.product_name;
 
         const quantity = Number(item.quantity);
 
-        if (!itemName || !Number.isInteger(quantity) || quantity <= 0) {
+        if (
+          !itemName ||
+          !Number.isInteger(quantity) ||
+          quantity <= 0
+        ) {
           return res.status(400).json({
-            error: "Invalid product or quantity."
+            error:
+              "Invalid product or quantity."
           });
         }
 
-        const catalogProduct = findCatalogProduct(itemName);
+        const catalogProduct =
+          findCatalogProduct(itemName);
 
         if (!catalogProduct) {
           return res.status(400).json({
-            error: `Product not found: ${itemName}`
+            error:
+              `Product not found: ${itemName}`
           });
         }
 
-        const normalizedItemName = normalizeName(itemName);
+        const normalizedItemName =
+          normalizeName(itemName);
 
         const databaseProduct =
           databaseProducts.find(
             product =>
-              normalizeName(product.name) === normalizedItemName
+              normalizeName(product.name) ===
+              normalizedItemName
           ) || null;
 
-        const unitPrice = catalogProduct.price;
-        const lineTotal = unitPrice * quantity;
+        const unitPrice =
+          catalogProduct.price;
+
+        const lineTotal =
+          unitPrice * quantity;
 
         totalAmount += lineTotal;
 
         orderItems.push({
-          product_id: databaseProduct
-            ? databaseProduct.id
-            : null,
+          product_id:
+            databaseProduct
+              ? databaseProduct.id
+              : null,
 
-          product_name: catalogProduct.name,
+          product_name:
+            catalogProduct.name,
 
           quantity,
 
-          unit_price_ngn: unitPrice,
+          unit_price_ngn:
+            unitPrice,
 
-          line_total_ngn: lineTotal
+          line_total_ngn:
+            lineTotal
         });
       }
 
       /*
-        Create a simple unique order number.
+        Generate order number.
       */
       const orderNumber =
         "AT-" +
-        Date.now().toString().slice(-8) +
+        Date.now()
+          .toString()
+          .slice(-8) +
         "-" +
-        Math.floor(100 + Math.random() * 900);
+        Math.floor(
+          100 + Math.random() * 900
+        );
 
       /*
-        Upload payment receipt.
+        Upload receipt.
       */
-      const safeEmail = String(customer_email)
-        .toLowerCase()
-        .replace(/[^a-z0-9]/g, "-")
-        .slice(0, 40);
+      const safeEmail =
+        String(customer_email)
+          .toLowerCase()
+          .replace(/[^a-z0-9]/g, "-")
+          .slice(0, 40);
 
       const extension =
         req.file.originalname
@@ -377,21 +525,28 @@ app.post(
           filePath,
           req.file.buffer,
           {
-            contentType: req.file.mimetype,
+            contentType:
+              req.file.mimetype,
+
             upsert: false
           }
         );
 
       if (uploadError) {
-        console.error("Receipt upload error:", uploadError);
+
+        console.error(
+          "Receipt upload error:",
+          uploadError
+        );
 
         return res.status(500).json({
-          error: "Could not upload payment receipt."
+          error:
+            "Could not upload payment receipt."
         });
       }
 
       /*
-        Create the order.
+        Create order.
       */
       const {
         data: order,
@@ -399,34 +554,54 @@ app.post(
       } = await supabase
         .from("orders")
         .insert({
-          order_number: orderNumber,
-          customer_name,
-          customer_email,
-          customer_phone,
+          order_number:
+            orderNumber,
+
+          customer_name:
+            customer_name,
+
+          customer_email:
+            customer_email,
+
+          customer_phone:
+            customer_phone,
+
           delivery_address:
             delivery_address || null,
-          total_amount_ngn: totalAmount,
-          payment_status: "proof_submitted",
-          payment_proof_url: filePath
+
+          total_amount_ngn:
+            totalAmount,
+
+          payment_status:
+            "proof_submitted",
+
+          payment_proof_url:
+            filePath
         })
         .select()
         .single();
 
       if (orderError) {
-        console.error("Order insert error:", orderError);
+
+        console.error(
+          "Order insert error:",
+          orderError
+        );
 
         return res.status(500).json({
-          error: "Could not create order."
+          error:
+            "Could not create order."
         });
       }
 
       /*
         Create order items.
       */
-      const itemsToInsert = orderItems.map(item => ({
-        ...item,
-        order_id: order.id
-      }));
+      const itemsToInsert =
+        orderItems.map(item => ({
+          ...item,
+          order_id: order.id
+        }));
 
       const {
         error: itemsError
@@ -435,41 +610,69 @@ app.post(
         .insert(itemsToInsert);
 
       if (itemsError) {
-        console.error("Order items error:", itemsError);
+
+        console.error(
+          "Order items error:",
+          itemsError
+        );
 
         return res.status(500).json({
-          error: "Could not save order items."
+          error:
+            "Could not save order items."
         });
       }
 
       res.json({
         success: true,
-        order_number: orderNumber,
-        order_id: order.id,
-        total_amount_ngn: totalAmount,
-        payment_status: "proof_submitted"
+
+        order_number:
+          orderNumber,
+
+        order_id:
+          order.id,
+
+        total_amount_ngn:
+          totalAmount,
+
+        payment_status:
+          "proof_submitted"
       });
 
     } catch (error) {
-      console.error("Order submission error:", error);
+
+      console.error(
+        "Order submission error:",
+        error
+      );
 
       res.status(500).json({
-        error: error.message || "Something went wrong."
+        error:
+          error.message ||
+          "Something went wrong."
       });
     }
   }
 );
 
 /*
-  General error handler.
+  GENERAL ERROR HANDLER
 */
 app.use((error, req, res, next) => {
-  console.error("Server error:", error);
+
+  console.error(
+    "Server error:",
+    error
+  );
 
   if (error instanceof multer.MulterError) {
-    if (error.code === "LIMIT_FILE_SIZE") {
+
+    if (
+      error.code ===
+      "LIMIT_FILE_SIZE"
+    ) {
       return res.status(400).json({
-        error: "Payment receipt must be 5MB or smaller."
+        error:
+          "Payment receipt must be 5MB or smaller."
       });
     }
 
@@ -479,15 +682,21 @@ app.use((error, req, res, next) => {
   }
 
   res.status(500).json({
-    error: error.message || "Server error."
+    error:
+      error.message ||
+      "Server error."
   });
 });
 
 /*
-  Serve the rest of the website.
+  SERVE WEBSITE
 */
-app.use(express.static(__dirname));
+app.use(
+  express.static(__dirname)
+);
 
 app.listen(PORT, () => {
-  console.log(`Avella Taste server running on port ${PORT}`);
+  console.log(
+    `Avella Taste server running on port ${PORT}`
+  );
 });
