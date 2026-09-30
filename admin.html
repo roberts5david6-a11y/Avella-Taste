@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Avella Taste — Admin Orders</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #fff7fa;
+      color: #3d2630;
+    }
+
+    header {
+      background: #e9a6bd;
+      padding: 22px 18px;
+      text-align: center;
+      color: white;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    header p {
+      margin: 6px 0 0;
+      font-size: 14px;
+    }
+
+    main {
+      max-width: 900px;
+      margin: 25px auto;
+      padding: 0 15px;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .top-bar h2 {
+      margin: 0;
+      font-size: 20px;
+    }
+
+    button {
+      border: none;
+      background: #d96b93;
+      color: white;
+      padding: 11px 17px;
+      border-radius: 10px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .order-card {
+      background: white;
+      border-radius: 16px;
+      padding: 18px;
+      margin-bottom: 16px;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.07);
+    }
+
+    .order-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .order-number {
+      font-weight: bold;
+      color: #b94d76;
+    }
+
+    .status {
+      padding: 6px 10px;
+      border-radius: 20px;
+      background: #fff0f5;
+      color: #b94d76;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .customer {
+      margin: 12px 0;
+      line-height: 1.7;
+      font-size: 14px;
+    }
+
+    .items {
+      border-top: 1px solid #f1dce4;
+      border-bottom: 1px solid #f1dce4;
+      padding: 12px 0;
+      margin: 12px 0;
+    }
+
+    .item {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 5px 0;
+      font-size: 14px;
+    }
+
+    .total {
+      font-size: 17px;
+      font-weight: bold;
+      color: #b94d76;
+      margin-top: 10px;
+    }
+
+    .empty {
+      background: white;
+      padding: 35px 20px;
+      text-align: center;
+      border-radius: 16px;
+      color: #8a6874;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 30px;
+      color: #8a6874;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <h1>Avella Taste</h1>
+    <p>Admin Orders</p>
+  </header>
+
+  <main>
+
+    <div class="top-bar">
+      <h2>Customer Orders</h2>
+      <button onclick="loadOrders()">Refresh Orders</button>
+    </div>
+
+    <div id="orders">
+      <div class="loading">Loading orders...</div>
+    </div>
+
+  </main>
+
+  <script>
+    async function loadOrders() {
+      const container = document.getElementById("orders");
+
+      container.innerHTML = `
+        <div class="loading">
+          Loading orders...
+        </div>
+      `;
+
+      try {
+        const response = await fetch("/api/admin/orders");
+
+        if (!response.ok) {
+          throw new Error("Could not load orders.");
+        }
+
+        const data = await response.json();
+
+        if (!data.orders || data.orders.length === 0) {
+          container.innerHTML = `
+            <div class="empty">
+              <h3>No orders yet</h3>
+              <p>New customer orders will appear here.</p>
+            </div>
+          `;
+          return;
+        }
+
+        container.innerHTML = data.orders.map(order => {
+
+          const items = order.order_items || [];
+
+          return `
+            <div class="order-card">
+
+              <div class="order-header">
+                <div class="order-number">
+                  ${escapeHtml(order.order_number)}
+                </div>
+
+                <div class="status">
+                  ${escapeHtml(order.payment_status)}
+                </div>
+              </div>
+
+              <div class="customer">
+                <strong>Customer:</strong>
+                ${escapeHtml(order.customer_name)}
+                <br>
+
+                <strong>Phone:</strong>
+                ${escapeHtml(order.customer_phone)}
+                <br>
+
+                <strong>Email:</strong>
+                ${escapeHtml(order.customer_email)}
+                <br>
+
+                <strong>Address:</strong>
+                ${escapeHtml(order.delivery_address || "Not provided")}
+              </div>
+
+              <div class="items">
+
+                ${items.map(item => `
+                  <div class="item">
+                    <span>
+                      ${escapeHtml(item.product_name)}
+                      × ${item.quantity}
+                    </span>
+
+                    <strong>
+                      ₦${Number(item.line_total_ngn).toLocaleString()}
+                    </strong>
+                  </div>
+                `).join("")}
+
+              </div>
+
+              <div class="total">
+                Total: ₦${Number(order.total_amount_ngn).toLocaleString()}
+              </div>
+
+            </div>
+          `;
+
+        }).join("");
+
+      } catch (error) {
+        container.innerHTML = `
+          <div class="empty">
+            <h3>Could not load orders</h3>
+            <p>${escapeHtml(error.message)}</p>
+          </div>
+        `;
+      }
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    loadOrders();
+  </script>
+
+</body>
+</html>
