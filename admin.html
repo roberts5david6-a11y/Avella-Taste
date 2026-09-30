@@ -68,6 +68,11 @@
       opacity: 0.9;
     }
 
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
     .order-card {
       background: white;
       border-radius: 16px;
@@ -145,10 +150,22 @@
       padding: 11px 16px;
       border-radius: 10px;
       font-size: 14px;
+      margin-right: 8px;
+      margin-bottom: 8px;
     }
 
-    .receipt-button:hover {
-      opacity: 0.9;
+    .confirm-button {
+      background: #b94d76;
+    }
+
+    .paid-message {
+      display: inline-block;
+      background: #e9f8ed;
+      color: #287a3d;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: bold;
     }
 
     .no-receipt {
@@ -168,6 +185,15 @@
       text-align: center;
       padding: 30px;
       color: #8a6874;
+    }
+
+    .error-message {
+      background: #fff0f0;
+      color: #a33a3a;
+      padding: 10px;
+      border-radius: 10px;
+      margin-top: 10px;
+      font-size: 13px;
     }
   </style>
 </head>
@@ -195,7 +221,9 @@
   </main>
 
   <script>
+
     async function loadOrders() {
+
       const container = document.getElementById("orders");
 
       container.innerHTML = `
@@ -205,6 +233,7 @@
       `;
 
       try {
+
         const response = await fetch("/api/admin/orders");
 
         if (!response.ok) {
@@ -214,12 +243,14 @@
         const data = await response.json();
 
         if (!data.orders || data.orders.length === 0) {
+
           container.innerHTML = `
             <div class="empty">
               <h3>No orders yet</h3>
               <p>New customer orders will appear here.</p>
             </div>
           `;
+
           return;
         }
 
@@ -230,8 +261,32 @@
           let receiptHTML = "";
 
           if (order.payment_proof_signed_url) {
+
+            let actionHTML = "";
+
+            if (order.payment_status === "paid") {
+
+              actionHTML = `
+                <span class="paid-message">
+                  Payment Confirmed ✓
+                </span>
+              `;
+
+            } else {
+
+              actionHTML = `
+                <button
+                  class="receipt-button confirm-button"
+                  onclick="confirmPayment('${escapeHtml(order.id)}')"
+                >
+                  Confirm Payment
+                </button>
+              `;
+            }
+
             receiptHTML = `
               <div class="receipt-section">
+
                 <h3>Payment Receipt</h3>
 
                 <a
@@ -242,20 +297,31 @@
                 >
                   View Payment Receipt
                 </a>
+
+                ${actionHTML}
+
+                <div id="error-${escapeHtml(order.id)}"></div>
+
               </div>
             `;
+
           } else {
+
             receiptHTML = `
               <div class="receipt-section">
+
                 <h3>Payment Receipt</h3>
+
                 <div class="no-receipt">
                   No payment receipt uploaded.
                 </div>
+
               </div>
             `;
           }
 
           return `
+
             <div class="order-card">
 
               <div class="order-header">
@@ -292,6 +358,7 @@
               <div class="items">
 
                 ${items.map(item => `
+
                   <div class="item">
 
                     <span>
@@ -304,13 +371,16 @@
                     </strong>
 
                   </div>
+
                 `).join("")}
 
               </div>
 
               <div class="total">
+
                 Total:
                 ₦${Number(order.total_amount_ngn).toLocaleString()}
+
               </div>
 
               ${receiptHTML}
@@ -337,16 +407,73 @@
       }
     }
 
+
+    async function confirmPayment(orderId) {
+
+      const button = event.target;
+
+      button.disabled = true;
+
+      button.textContent = "Confirming...";
+
+      const errorBox =
+        document.getElementById(`error-${orderId}`);
+
+      if (errorBox) {
+        errorBox.innerHTML = "";
+      }
+
+      try {
+
+        const response = await fetch(
+          "/api/admin/orders/" + orderId + "/confirm-payment",
+          {
+            method: "POST"
+          }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(
+            data.error || "Could not confirm payment."
+          );
+        }
+
+        await loadOrders();
+
+      } catch (error) {
+
+        if (errorBox) {
+
+          errorBox.innerHTML = `
+            <div class="error-message">
+              ${escapeHtml(error.message)}
+            </div>
+          `;
+
+        }
+
+        button.disabled = false;
+        button.textContent = "Confirm Payment";
+      }
+    }
+
+
     function escapeHtml(value) {
+
       return String(value ?? "")
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
+
     }
 
+
     loadOrders();
+
   </script>
 
 </body>
