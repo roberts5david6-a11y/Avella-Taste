@@ -24,6 +24,54 @@ body {
   background: var(--cream);
   color: var(--brown);
   line-height: 1.6;
+  position: relative;
+}
+
+/* AVELLA TASTE WATERMARK */
+
+body::before {
+  content: "";
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 420px;
+  height: 420px;
+  transform: translate(-50%, -50%);
+  background-image: url("avella-logo.jpg");
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0.035;
+  pointer-events: none;
+  z-index: 0;
+}
+
+body::after {
+  content: "Yummy Everyday";
+  position: fixed;
+  bottom: 18px;
+  right: 18px;
+  font-family: "Playfair Display", serif;
+  font-size: 0.85rem;
+  font-style: italic;
+  color: var(--dark-pink);
+  opacity: 0.22;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Keep website content above watermark */
+
+.header,
+.hero,
+.menu-section,
+.cart-overlay,
+.checkout-overlay,
+footer,
+main,
+section {
+  position: relative;
+  z-index: 1;
 }
 
 button,
@@ -507,4 +555,16 @@ footer a {
   .section-heading {
     margin-bottom: 45px;
   }
-}
+
+  body::before {
+    width: 300px;
+    height: 300px;
+    opacity: 0.03;
+  }
+
+  body::after {
+    font-size: 0.75rem;
+    bottom: 12px;
+    right: 12px;
+  }
+  }
