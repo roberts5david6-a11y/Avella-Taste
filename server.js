@@ -76,6 +76,191 @@ app.get("/", (req, res) => {
 
 
 // ============================================
+// NORMALIZE PRODUCT TEXT
+// ============================================
+
+function normalizeProductText(value) {
+
+  return String(value || "")
+    .toLowerCase()
+    .trim()
+    .replace(/[–—]/g, "-")
+    .replace(/\s+/g, " ")
+    .replace(/\bpiece(s)?\b/g, "pc")
+    .replace(/\bpcs\b/g, "pc")
+    .replace(/\bmilliliters\b/g, "ml")
+    .replace(/\bmillilitre(s)?\b/g, "ml")
+    .replace(/\blitre(s)?\b/g, "l")
+    .replace(/\bliters\b/g, "l")
+    .replace(/\s*-\s*/g, "-");
+
+}
+
+
+// ============================================
+// CREATE PRODUCT SEARCH NAME
+// ============================================
+
+function getProductSearchName(product) {
+
+  const name =
+    String(product.name || "").trim();
+
+  const size =
+    String(product.size || "").trim();
+
+
+  if (!size) {
+
+    return normalizeProductText(name);
+
+  }
+
+
+  return normalizeProductText(
+    `${name} - ${size}`
+  );
+
+}
+
+
+// ============================================
+// FIND PRODUCT
+// ============================================
+
+function findMatchingProduct(products, cartItem) {
+
+  const cartName =
+    String(
+      cartItem.name ||
+      cartItem.product_name ||
+      ""
+    ).trim();
+
+
+  const normalizedCartName =
+    normalizeProductText(cartName);
+
+
+  // ------------------------------------------
+  // FIRST: EXACT NORMALIZED FULL NAME
+  // ------------------------------------------
+
+  let product =
+    products.find(
+      p =>
+        getProductSearchName(p) ===
+        normalizedCartName
+    );
+
+
+  if (product) {
+
+    return product;
+
+  }
+
+
+  // ------------------------------------------
+  // SECOND: MATCH PRODUCT NAME
+  // AND RECOGNIZE SIZE
+  // ------------------------------------------
+
+  product =
+    products.find(
+      p => {
+
+        const databaseName =
+          normalizeProductText(p.name);
+
+        const databaseSize =
+          normalizeProductText(p.size);
+
+
+        if (
+          normalizedCartName ===
+          databaseName
+        ) {
+
+          return true;
+
+        }
+
+
+        if (
+          databaseSize &&
+          normalizedCartName.includes(
+            databaseName
+          ) &&
+          normalizedCartName.includes(
+            databaseSize
+          )
+        ) {
+
+          return true;
+
+        }
+
+
+        // 1 pc = 1 piece
+        if (
+          databaseSize === "1 pc" &&
+          normalizedCartName.includes("1 pc")
+        ) {
+
+          return (
+            normalizedCartName.includes(
+              databaseName
+            )
+          );
+
+        }
+
+
+        // 3 pcs = 3 pieces
+        if (
+          databaseSize === "3 pcs" &&
+          normalizedCartName.includes("3 pc")
+        ) {
+
+          return (
+            normalizedCartName.includes(
+              databaseName
+            )
+          );
+
+        }
+
+
+        // Pack of 4
+        if (
+          databaseSize === "pack of 4" &&
+          normalizedCartName.includes(
+            "pack of 4"
+          )
+        ) {
+
+          return (
+            normalizedCartName.includes(
+              databaseName
+            )
+          );
+
+        }
+
+
+        return false;
+
+      }
+    );
+
+
+  return product || null;
+
+}
+
+
+// ============================================
 // CREATE CUSTOMER ORDER
 // ============================================
 
@@ -201,54 +386,10 @@ app.post(
 
       for (const item of cartItems) {
 
-        const itemName =
-          String(
-            item.name ||
-            item.product_name ||
-            ""
-          ).trim();
-
-
-        // --------------------------------------
-        // FIND PRODUCT
-        //
-        // Supports both:
-        //
-        // "Mini Banana Bread - 1 pc"
-        //
-        // and products where:
-        //
-        // name = "Mini Banana Bread"
-        // size = "1 pc"
-        // --------------------------------------
-
         const product =
-          products.find(
-            p => {
-
-              const databaseName =
-                String(
-                  p.name || ""
-                ).trim();
-
-              const databaseSize =
-                String(
-                  p.size || ""
-                ).trim();
-
-
-              const fullDatabaseName =
-                databaseSize
-                  ? `${databaseName} - ${databaseSize}`
-                  : databaseName;
-
-
-              return (
-                databaseName === itemName ||
-                fullDatabaseName === itemName
-              );
-
-            }
+          findMatchingProduct(
+            products,
+            item
           );
 
 
@@ -257,7 +398,10 @@ app.post(
           return res.status(400).json({
 
             error:
-              `Product not found: ${itemName}`
+              `Product not found: ${
+                item.name ||
+                item.product_name
+              }`
 
           });
 
