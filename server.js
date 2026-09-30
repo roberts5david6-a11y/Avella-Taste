@@ -76,50 +76,65 @@ app.get("/", (req, res) => {
 
 
 // ============================================
-// NORMALIZE PRODUCT TEXT
+// NORMALIZE TEXT
 // ============================================
 
-function normalizeProductText(value) {
+function normalizeText(value) {
 
   return String(value || "")
     .toLowerCase()
     .trim()
     .replace(/[–—]/g, "-")
     .replace(/\s+/g, " ")
-    .replace(/\bpiece(s)?\b/g, "pc")
+    .replace(/\bpieces\b/g, "pc")
+    .replace(/\bpiece\b/g, "pc")
     .replace(/\bpcs\b/g, "pc")
     .replace(/\bmilliliters\b/g, "ml")
-    .replace(/\bmillilitre(s)?\b/g, "ml")
-    .replace(/\blitre(s)?\b/g, "l")
+    .replace(/\bmillilitres\b/g, "ml")
     .replace(/\bliters\b/g, "l")
+    .replace(/\blitres\b/g, "l")
+    .replace(/\blitre\b/g, "l")
+    .replace(/\bliter\b/g, "l")
     .replace(/\s*-\s*/g, "-");
 
 }
 
 
 // ============================================
-// CREATE PRODUCT SEARCH NAME
+// REMOVE EXTRA DESCRIPTION
 // ============================================
 
-function getProductSearchName(product) {
+function normalizeProductName(value) {
 
-  const name =
-    String(product.name || "").trim();
+  return normalizeText(value)
 
-  const size =
-    String(product.size || "").trim();
+    // Remove things such as:
+    // (Plain)
+    // (Sweetened)
+    // (Unsweetened)
+
+    .replace(/\([^)]*\)/g, "")
+
+    .replace(/\s+/g, " ")
+
+    .trim();
+
+}
 
 
-  if (!size) {
+// ============================================
+// NORMALIZE SIZE
+// ============================================
 
-    return normalizeProductText(name);
+function normalizeSize(value) {
 
-  }
+  return normalizeText(value)
 
+    .replace(/\s+/g, "")
 
-  return normalizeProductText(
-    `${name} - ${size}`
-  );
+    .replace(/^(\d+)pieces?$/, "$1pc")
+
+    .replace(/^(\d+)pcs$/, "$1pc");
 
 }
 
@@ -138,124 +153,139 @@ function findMatchingProduct(products, cartItem) {
     ).trim();
 
 
-  const normalizedCartName =
-    normalizeProductText(cartName);
+  const cartFull =
+    normalizeText(cartName);
 
 
   // ------------------------------------------
-  // FIRST: EXACT NORMALIZED FULL NAME
+  // SPLIT CART NAME
+  //
+  // Example:
+  //
+  // Milky Yogurt (Plain) - 35cl
+  //
+  // becomes:
+  //
+  // name = Milky Yogurt (Plain)
+  // size = 35cl
   // ------------------------------------------
 
-  let product =
-    products.find(
-      p =>
-        getProductSearchName(p) ===
-        normalizedCartName
+  const parts =
+    cartFull.split("-");
+
+
+  let cartNamePart =
+    parts[0] || cartFull;
+
+
+  let cartSizePart =
+    parts.slice(1).join("-");
+
+
+  cartNamePart =
+    normalizeProductName(
+      cartNamePart
     );
 
 
-  if (product) {
+  cartSizePart =
+    normalizeSize(
+      cartSizePart
+    );
 
-    return product;
+
+  // ------------------------------------------
+  // TRY EVERY ACTIVE PRODUCT
+  // ------------------------------------------
+
+  for (const product of products) {
+
+    const databaseName =
+      normalizeProductName(
+        product.name
+      );
+
+
+    const databaseSize =
+      normalizeSize(
+        product.size
+      );
+
+
+    const databaseFull =
+      normalizeText(
+        `${product.name} ${
+          product.size
+            ? "- " + product.size
+            : ""
+        }`
+      );
+
+
+    // ----------------------------------------
+    // MATCH 1
+    // EXACT FULL NAME
+    // ----------------------------------------
+
+    if (
+      databaseFull === cartFull
+    ) {
+
+      return product;
+
+    }
+
+
+    // ----------------------------------------
+    // MATCH 2
+    // NAME + SIZE
+    // ----------------------------------------
+
+    if (
+      databaseName === cartNamePart &&
+      databaseSize === cartSizePart
+    ) {
+
+      return product;
+
+    }
+
+
+    // ----------------------------------------
+    // MATCH 3
+    // CART NAME CONTAINS DATABASE NAME
+    // WITH SAME SIZE
+    // ----------------------------------------
+
+    if (
+      cartNamePart.includes(databaseName) &&
+      databaseSize === cartSizePart
+    ) {
+
+      return product;
+
+    }
+
+
+    // ----------------------------------------
+    // MATCH 4
+    // DATABASE NAME CONTAINS CART NAME
+    // WITH SAME SIZE
+    // ----------------------------------------
+
+    if (
+      databaseName.includes(cartNamePart) &&
+      databaseSize === cartSizePart
+    ) {
+
+      return product;
+
+    }
 
   }
 
 
-  // ------------------------------------------
-  // SECOND: MATCH PRODUCT NAME
-  // AND RECOGNIZE SIZE
-  // ------------------------------------------
-
-  product =
-    products.find(
-      p => {
-
-        const databaseName =
-          normalizeProductText(p.name);
-
-        const databaseSize =
-          normalizeProductText(p.size);
-
-
-        if (
-          normalizedCartName ===
-          databaseName
-        ) {
-
-          return true;
-
-        }
-
-
-        if (
-          databaseSize &&
-          normalizedCartName.includes(
-            databaseName
-          ) &&
-          normalizedCartName.includes(
-            databaseSize
-          )
-        ) {
-
-          return true;
-
-        }
-
-
-        // 1 pc = 1 piece
-        if (
-          databaseSize === "1 pc" &&
-          normalizedCartName.includes("1 pc")
-        ) {
-
-          return (
-            normalizedCartName.includes(
-              databaseName
-            )
-          );
-
-        }
-
-
-        // 3 pcs = 3 pieces
-        if (
-          databaseSize === "3 pcs" &&
-          normalizedCartName.includes("3 pc")
-        ) {
-
-          return (
-            normalizedCartName.includes(
-              databaseName
-            )
-          );
-
-        }
-
-
-        // Pack of 4
-        if (
-          databaseSize === "pack of 4" &&
-          normalizedCartName.includes(
-            "pack of 4"
-          )
-        ) {
-
-          return (
-            normalizedCartName.includes(
-              databaseName
-            )
-          );
-
-        }
-
-
-        return false;
-
-      }
-    );
-
-
-  return product || null;
+  return null;
 
 }
 
@@ -353,7 +383,7 @@ app.post(
 
 
       // ----------------------------------------
-      // GET PRODUCTS FROM SUPABASE
+      // GET ACTIVE PRODUCTS
       // ----------------------------------------
 
       const {
@@ -436,10 +466,12 @@ app.post(
         // --------------------------------------
 
         const lineTotal =
-          product.price_ngn * quantity;
+          product.price_ngn *
+          quantity;
 
 
-        totalAmount += lineTotal;
+        totalAmount +=
+          lineTotal;
 
 
         // --------------------------------------
@@ -468,9 +500,9 @@ app.post(
       }
 
 
-      // ----------------------------------------
-      // UPLOAD RECEIPT TO SUPABASE STORAGE
-      // ----------------------------------------
+      // ========================================
+      // UPLOAD PAYMENT RECEIPT
+      // ========================================
 
       const fileExtension =
         req.file.originalname
@@ -482,7 +514,10 @@ app.post(
       const safeEmail =
         customer_email
           .toLowerCase()
-          .replace(/[^a-z0-9]/g, "-");
+          .replace(
+            /[^a-z0-9]/g,
+            "-"
+          );
 
 
       const fileName =
@@ -521,18 +556,18 @@ app.post(
       }
 
 
-      // ----------------------------------------
+      // ========================================
       // CREATE ORDER NUMBER
-      // ----------------------------------------
+      // ========================================
 
       const orderNumber =
         "AT-" +
         Date.now().toString();
 
 
-      // ----------------------------------------
+      // ========================================
       // CREATE ORDER
-      // ----------------------------------------
+      // ========================================
 
       const {
         data: order,
@@ -581,32 +616,34 @@ app.post(
       }
 
 
-      // ----------------------------------------
+      // ========================================
       // CREATE ORDER ITEMS
-      // ----------------------------------------
+      // ========================================
 
       const itemsToInsert =
-        orderItems.map(item => ({
+        orderItems.map(
+          item => ({
 
-          order_id:
-            order.id,
+            order_id:
+              order.id,
 
-          product_id:
-            item.product_id,
+            product_id:
+              item.product_id,
 
-          product_name:
-            item.product_name,
+            product_name:
+              item.product_name,
 
-          quantity:
-            item.quantity,
+            quantity:
+              item.quantity,
 
-          unit_price_ngn:
-            item.unit_price_ngn,
+            unit_price_ngn:
+              item.unit_price_ngn,
 
-          line_total_ngn:
-            item.line_total_ngn
+            line_total_ngn:
+              item.line_total_ngn
 
-        }));
+          })
+        );
 
 
       const {
@@ -615,7 +652,9 @@ app.post(
 
         .from("order_items")
 
-        .insert(itemsToInsert);
+        .insert(
+          itemsToInsert
+        );
 
 
       if (itemsError) {
@@ -625,9 +664,9 @@ app.post(
       }
 
 
-      // ----------------------------------------
+      // ========================================
       // SUCCESS
-      // ----------------------------------------
+      // ========================================
 
       return res.status(201).json({
 
@@ -688,7 +727,8 @@ app.use(
     ) {
 
       if (
-        error.code === "LIMIT_FILE_SIZE"
+        error.code ===
+        "LIMIT_FILE_SIZE"
       ) {
 
         return res.status(400).json({
