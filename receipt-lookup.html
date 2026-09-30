@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Generate Receipt - Avella Taste</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, sans-serif;
+      background: #fff7f3;
+      color: #4b2e2e;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image: url("/avella-logo.jpg");
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: 420px;
+      opacity: 0.035;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 480px;
+      background: rgba(255, 255, 255, 0.96);
+      border-radius: 24px;
+      padding: 30px 24px;
+      box-shadow: 0 10px 35px rgba(91, 49, 49, 0.12);
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .logo {
+      width: 100px;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 50%;
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      margin: 5px 0;
+      color: #7d3f5c;
+      font-size: 28px;
+    }
+
+    .motto {
+      margin: 0 0 25px;
+      color: #8a6a55;
+      font-size: 15px;
+      font-style: italic;
+    }
+
+    .intro {
+      font-size: 15px;
+      line-height: 1.6;
+      margin-bottom: 22px;
+      color: #5f4a4a;
+    }
+
+    label {
+      display: block;
+      text-align: left;
+      margin: 14px 0 7px;
+      font-weight: bold;
+      color: #5b3a3a;
+    }
+
+    input {
+      width: 100%;
+      padding: 14px 15px;
+      border: 1px solid #e4caca;
+      border-radius: 12px;
+      font-size: 16px;
+      outline: none;
+      background: #fffafa;
+    }
+
+    input:focus {
+      border-color: #c77999;
+      box-shadow: 0 0 0 3px rgba(199, 121, 153, 0.12);
+    }
+
+    button {
+      width: 100%;
+      border: none;
+      border-radius: 14px;
+      padding: 15px;
+      margin-top: 20px;
+      background: #b85c82;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #9f4d70;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .message {
+      margin-top: 20px;
+      padding: 14px;
+      border-radius: 12px;
+      display: none;
+      line-height: 1.5;
+      font-size: 14px;
+    }
+
+    .message.success {
+      display: block;
+      background: #edf8ef;
+      color: #28633a;
+      border: 1px solid #b9dfc1;
+    }
+
+    .message.error {
+      display: block;
+      background: #fff0f0;
+      color: #9a3434;
+      border: 1px solid #edc0c0;
+    }
+
+    .message.pending {
+      display: block;
+      background: #fff8e8;
+      color: #80611c;
+      border: 1px solid #ead59b;
+    }
+
+    .receipt-button {
+      display: block;
+      width: 100%;
+      margin-top: 12px;
+      padding: 14px;
+      border-radius: 14px;
+      background: #7d3f5c;
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-top: 22px;
+      color: #8b5570;
+      text-decoration: none;
+      font-size: 14px;
+    }
+
+    .back-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <img
+      src="/avella-logo.jpg"
+      alt="Avella Taste Logo"
+      class="logo"
+    >
+
+    <h1>Generate My Receipt</h1>
+
+    <p class="motto">Yummy Everyday</p>
+
+    <p class="intro">
+      Enter your order number and phone number to check your payment
+      and generate your Avella Taste receipt.
+    </p>
+
+    <form id="receiptForm">
+
+      <label for="orderNumber">
+        Order Number
+      </label>
+
+      <input
+        type="text"
+        id="orderNumber"
+        placeholder="Enter your order number"
+        required
+      >
+
+      <label for="phone">
+        Phone Number
+      </label>
+
+      <input
+        type="tel"
+        id="phone"
+        placeholder="Enter the phone number used for your order"
+        required
+      >
+
+      <button type="submit" id="submitButton">
+        Generate My Receipt
+      </button>
+
+    </form>
+
+    <div id="message" class="message"></div>
+
+    <a href="/" class="back-link">
+      ← Back to Avella Taste
+    </a>
+
+  </div>
+
+  <script>
+    const form = document.getElementById("receiptForm");
+    const message = document.getElementById("message");
+    const submitButton = document.getElementById("submitButton");
+
+    form.addEventListener("submit", async function(event) {
+      event.preventDefault();
+
+      const orderNumber =
+        document.getElementById("orderNumber").value.trim();
+
+      const phone =
+        document.getElementById("phone").value.trim();
+
+      message.className = "message";
+      message.textContent = "";
+      message.style.display = "none";
+
+      submitButton.disabled = true;
+      submitButton.textContent = "Checking...";
+
+      try {
+        const response = await fetch("/api/receipt-lookup", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            order_number: orderNumber,
+            customer_phone: phone
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.success && data.receipt_url) {
+          message.className = "message success";
+
+          message.innerHTML = `
+            <strong>Payment Confirmed ✓</strong><br>
+            Your receipt is ready.
+            <a
+              href="${data.receipt_url}"
+              class="receipt-button"
+            >
+              View & Download Receipt
+            </a>
+          `;
+
+          return;
+        }
+
+        if (data.payment_status === "proof_submitted") {
+          message.className = "message pending";
+
+          message.innerHTML = `
+            <strong>Payment Proof Received</strong><br>
+            Your payment is still being reviewed.
+            Please check again after your payment has been confirmed.
+          `;
+
+          return;
+        }
+
+        message.className = "message error";
+
+        message.innerHTML = `
+          <strong>Order not found</strong><br>
+          Please check your order number and phone number and try again.
+        `;
+
+      } catch (error) {
+        message.className = "message error";
+
+        message.innerHTML = `
+          <strong>Something went wrong.</strong><br>
+          Please check your internet connection and try again.
+        `;
+
+      } finally {
+        submitButton.disabled = false;
+        submitButton.textContent = "Generate My Receipt";
+      }
+    });
+  </script>
+
+</body>
+</html>
